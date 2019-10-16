@@ -4,14 +4,14 @@
     <div class="form">
       <div class="input_outer">
         <span class="u_user"></span>
-        <input name="logname" placeholder="输入ID或用户名登录" class="text" type="text" />
+        <input name="logname" placeholder="输入ID或用户名登录" class="text" type="text" @input="nameChange"/>
       </div>
       <div class="input_outer">
         <span class="us_uer"></span>
-        <input name="logpass" class="text" type="password" placeholder="输入密码" />
+        <input name="logpass" class="text" type="password" placeholder="输入密码" @input="pwdChange" />
       </div>
       <div class="mb2">
-        <a class="act-but submit" href="javascript:;" style="color: rgb(47, 167, 46)">登录</a>
+        <a class="act-but submit" href="javascript:;" style="color: rgb(47, 167, 46)" @click="login">登录</a>
       </div>
     </div>
 
@@ -22,6 +22,7 @@
 </template>
 
 <script>
+import { login } from '../actions/interface.js';
 export default {
   data(){
     return {
@@ -32,6 +33,23 @@ export default {
   methods: {
     toRegister(){
       this.$router.push({name: 'register'})
+    },
+    nameChange(e){
+      console.log(e.target.value)
+    },
+    pwdChange(e){
+      console.log(e.target.value)
+    },
+    login(){
+      login().then(res => {
+        if(res.state){
+          this.$router.push({name: 'home'});
+        }else{
+          throw new Error(res.message);
+        }
+      }).catch(e => {
+        console.log(e.message)
+      })
     }
   }
 };
