@@ -35,17 +35,17 @@ export default {
       this.$router.push({name: 'register'})
     },
     nameChange(e){
-      console.log(e.target.value)
+      this.username = e.target.value.trim();
     },
     pwdChange(e){
-      console.log(e.target.value)
+      this.password = e.target.value.trim();
     },
     login(){
-      login().then(res => {
-        if(res.state){
+      login(this.username,this.password).then(res => {
+        if(res && res.state === 'success'){
           this.$router.push({name: 'home'});
         }else{
-          throw new Error(res.message);
+          throw new Error(res && res.msg);
         }
       }).catch(e => {
         console.log(e.message)
@@ -57,7 +57,7 @@ export default {
 
 <style lang="scss">
 .logo_box {
-  width: 280px;
+  width: 350px;
   padding: 35px;
   position: absolute;
   left: 50%;
@@ -66,12 +66,11 @@ export default {
   margin-top: -200px;
   h3 {
     text-align: center;
-    height: 20px;
-    font: 20px "microsoft yahei", Helvetica, Tahoma, Arial, "Microsoft jhengHei",
+    font: 24px "microsoft yahei", Helvetica, Tahoma, Arial, "Microsoft jhengHei",
       sans-serif;
     color: rgb(47, 167, 46);
-    height: 20px;
-    line-height: 20px;
+    height: 40px;
+    line-height: 40px;
     padding: 0 0 35px 0;
   }
   .forms {
@@ -123,11 +122,11 @@ export default {
     background: none;
     line-height: 46px;
   }
-  /*///*/
   .mb2 {
     margin-bottom: 20px;
   }
   .mb2 a {
+    height: 46px;
     text-decoration: none;
     outline: none;
   }

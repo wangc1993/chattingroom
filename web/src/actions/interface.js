@@ -5,14 +5,15 @@
 * @Last Modified time: 2019-10-16 22:30:34
 */
 
-const baseURL = 'http://10.254.2.95:7002/mock/450';
+// const baseURL = 'http://10.254.2.95:7002/mock/450';
+const baseURL = 'http://localhost:3005';
 
 const register = (username,password) => {
     return fetch(`${baseURL}/register`,{
         method: 'POST',
-        header: {
+        headers: new Headers({
             'Content-Type':'application/json;charset=utf-8',
-        },
+        }),
         body: JSON.stringify({
             username,
             password
@@ -29,9 +30,9 @@ const register = (username,password) => {
 const login = (username,password) => {
     return fetch(`${baseURL}/login`,{
         method: 'POST',
-        header: {
+        headers: new Headers({
             'Content-Type':'application/json;charset=utf-8',
-        },
+        }),
         body: JSON.stringify({
             username,
             password
