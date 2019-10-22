@@ -12,13 +12,10 @@ server.use(bodyParser());
 /*加载数据库模块*/
 let mongoose = require('mongoose');
 //路由权限控制
-const koaJwt = require('koa-jwt') 
+const koaJwt = require('koa-jwt')
+// 定义签名
+const jwtSecret = 'chattingroom';
 // 跨域设置 
-// server.use(convert(cors));
-server.use(async (ctx, next) => {
-    ctx.set('Access-Control-Allow-Origin', '*');
-    await next();
-});
 // 由于做了跨域,所以前端用post请求后台接口的时候,会有预检,及时options请求,解决的方法,在nodejs里对options的请求直接返回200
 server.use(async (ctx, next) => {
     ctx.set('Access-Control-Allow-Origin', '*');
@@ -30,14 +27,33 @@ server.use(async (ctx, next) => {
         await next();
     }
 });
+
+// 错误处理
+server.use((ctx, next) => {
+    return next().catch((err) => {
+        if(err.status === 401){
+            ctx.status = 401;
+      		ctx.body = 'Protected resource, use Authorization header to get access\n';
+        }else{
+            throw err;
+        }
+    })
+})
+//jwt验证(需放在路由前)
+server.use(koaJwt({
+    secret: jwtSecret,
+    getToken: function fromHeader(ctx) {
+        if (ctx.request.header.token) {
+            return ctx.request.header.token;
+        }
+        return null;
+    }
+}).unless({
+    path:[/\/register/, /\/login/]
+}))
 const index = require('./routes/index');
 //校验请求的方法
 server.use(index.routes(), index.allowedMethods())
-
-
-// server.use(async ctx => {
-//     ctx.body = {www: 'hello world'}
-// })
 
 /*连接数据库*/
 mongoose.connect('mongodb://localhost:27017/chattingroom', {

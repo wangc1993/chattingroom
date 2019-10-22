@@ -23,6 +23,7 @@
 
 <script>
 import { login } from '../actions/interface.js';
+import { setCookie } from '../utils/util.js';
 export default {
   data(){
     return {
@@ -41,9 +42,14 @@ export default {
       this.password = e.target.value.trim();
     },
     login(){
-      login(this.username,this.password).then(res => {
+      const that = this;
+      login(that.username,that.password).then(res => {
         if(res && res.state === 'success'){
-          this.$router.push({name: 'home'});
+          setCookie('token',res.data.token);
+          that.$store.commit('setToken', res.data.token);
+          setCookie('username',that.username);
+          that.$store.commit('setUsername', that.username);
+          that.$router.push({name: 'home'});
         }else{
           throw new Error(res && res.msg);
         }

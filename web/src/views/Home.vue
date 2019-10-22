@@ -27,7 +27,7 @@
           <span id="num">0</span>)
         </h1>
         <ul id="users"></ul>
-        <p>当前无人在线哟~</p>
+        <p>当前无人在线哟~{{username}}</p>
       </div>
     </div>
   </div>
@@ -35,7 +35,11 @@
 
 <script>
 export default {
-  name: "home"
+  data(){
+    return{
+      username: this.$store.state.username
+    }
+  }
 };
 </script>
 <style lang="scss" scoped>

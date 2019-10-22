@@ -41,7 +41,7 @@ router.post('/login', async (ctx, next) => {
   if(serchInfo){
     if(serchInfo.password === password){
       const authToken = setToken(username);
-      setResponse(ctx, 'success', '登录成功', authToken);
+      setResponse(ctx, 'success', '登录成功', {token: authToken});
     }else{
       setResponse(ctx, 'fail', '密码不正确');
     }
