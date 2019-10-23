@@ -24,41 +24,58 @@
       <div class="contacts">
         <h1>
           在线人员(
-          <span id="num">0</span>)
+          <span id="num">{{onlineUserList.length}}</span>)
         </h1>
         <ul id="users"></ul>
-        <p>当前无人在线哟~{{username}}</p>
+        <p>当前无人在线哟~</p>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import { getOnlineUserList } from "../actions/interface.js";
 export default {
-  data(){
-    return{
-      username: this.$store.state.username
-    }
+  data() {
+    return {
+      onlineUserList: []
+    };
+  },
+  created() {
+    getOnlineUserList()
+      .then(res => {
+        if (res && res.state === "success") {
+          this.onlineUserList = res.data;
+        } else {
+          throw new Error(res && res.msg);
+        }
+      })
+      .catch(e => {
+        console.log(e.message);
+      });
+    this.$store.state.socket.on("onlineUserChange", data => {
+      this.onlineUserList = data;
+    });
   }
 };
 </script>
 <style lang="scss" scoped>
 .shaking {
-    animation: run 0.2s infinite;
+  animation: run 0.2s infinite;
 }
 @keyframes run {
-    0% {
-        left: 0;
-    }
-    25% {
-        left: -7px;
-    }
-    50% {
-        left: 7px;
-    }
-    100% {
-        left: 0;
-    }
+  0% {
+    left: 0;
+  }
+  25% {
+    left: -7px;
+  }
+  50% {
+    left: 7px;
+  }
+  100% {
+    left: 0;
+  }
 }
 .main {
   width: 710px;
@@ -83,11 +100,11 @@ export default {
     font-size: 23px;
     color: #555;
     img {
-        width: 50px;
-        height: 50px;
-        border-radius: 25px;
-        vertical-align: middle;
-     }
+      width: 50px;
+      height: 50px;
+      border-radius: 25px;
+      vertical-align: middle;
+    }
   }
   .container {
     height: 471px;
@@ -95,7 +112,7 @@ export default {
     .conversation {
       width: 490px;
     }
-    .extra{
+    .extra {
       height: 30px;
       width: 100%;
       border-top: 1px solid #eee;
@@ -105,12 +122,12 @@ export default {
       padding: 10px 10px 0px 10px;
       overflow-y: auto;
 
-      &::-webkit-scrollbar{
+      &::-webkit-scrollbar {
         /*滚动条整体样式*/
         width: 4px;
         height: 4px;
       }
-      &::-webkit-scrollbar-thumb{
+      &::-webkit-scrollbar-thumb {
         /*滚动条里面小方块*/
         border-radius: 5px;
         box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
@@ -125,7 +142,7 @@ export default {
         background: rgba(0, 0, 0, 0.1);
       }
     }
-    .action{
+    .action {
       text-align: right;
       margin-top: 5px;
       .btn {
@@ -145,7 +162,7 @@ export default {
         background-color: #b495a1;
       }
     }
-    .contacts{
+    .contacts {
       width: 210px;
       height: 100%;
       padding: 6px;
@@ -165,9 +182,9 @@ export default {
           text-align: center;
           margin-bottom: 5px;
           img {
-              width: 100%;
-              height: 45.5px;
-            }
+            width: 100%;
+            height: 45.5px;
+          }
         }
       }
       li > span {

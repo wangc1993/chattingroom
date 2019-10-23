@@ -4,7 +4,7 @@
 * @Last Modified by:   Carrey Wang
 * @Last Modified time: 2019-10-20 16:05:34
 */
-
+const R = require('ramda');
 const Koa = require('koa');
 const server = new Koa();
 const bodyParser = require('koa-bodyparser');
@@ -15,6 +15,10 @@ let mongoose = require('mongoose');
 const koaJwt = require('koa-jwt')
 // 定义签名
 const jwtSecret = 'chattingroom';
+/*socket.io公式*/
+let http = require('http').createServer(server);
+let io = require('socket.io')(http);
+
 // 跨域设置 
 // 由于做了跨域,所以前端用post请求后台接口的时候,会有预检,及时options请求,解决的方法,在nodejs里对options的请求直接返回200
 server.use(async (ctx, next) => {
@@ -28,13 +32,13 @@ server.use(async (ctx, next) => {
     }
 });
 
-// 错误处理
+//权限错误处理
 server.use((ctx, next) => {
     return next().catch((err) => {
-        if(err.status === 401){
+        if (err.status === 401) {
             ctx.status = 401;
-      		ctx.body = 'Protected resource, use Authorization header to get access\n';
-        }else{
+            ctx.body = 'Protected resource, use Authorization header to get access\n';
+        } else {
             throw err;
         }
     })
@@ -49,11 +53,29 @@ server.use(koaJwt({
         return null;
     }
 }).unless({
-    path:[/\/register/, /\/login/]
+    path: [/\/register/, /\/login/]
 }))
+
+//路由引入
 const index = require('./routes/index');
 //校验请求的方法
 server.use(index.routes(), index.allowedMethods())
+
+//在线用户
+global.onlineUserList = [];
+// 监听连接事件
+io.on('connection', socket => {
+    console.log('初始化成功！下面可以用socket绑定事件和触发事件了');
+    socket.on('userLogin', data => {
+        const equalUser = R.filter((user) => {
+            return user.username === data.username
+        }, global.onlineUserList);
+        if (equalUser.length < 1) {
+            global.onlineUserList.push(data);
+            socket.emit("onlineUserChange", global.onlineUserList);
+        }
+    })
+});
 
 /*连接数据库*/
 mongoose.connect('mongodb://localhost:27017/chattingroom', {
@@ -63,10 +85,13 @@ mongoose.connect('mongodb://localhost:27017/chattingroom', {
         console.log("数据库连接失败！");
     } else {
         console.log("数据库连接成功！");
-        /*警告：app.listen（80）在这里socket不起作用！*/
+        /*警告：server.listen在这里socket不起作用！会报404*/
         // http.listen(8081);
         server.listen(3005, () => {
             console.log('服务启动在3005端口！')
+        })
+        http.listen(3006, () => {
+            console.log('websocket启动在3006端口！')
         })
     }
 });

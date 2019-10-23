@@ -4,58 +4,71 @@
     <div class="form">
       <div class="input_outer">
         <span class="u_user"></span>
-        <input name="logname" placeholder="输入ID或用户名登录" class="text" type="text" @input="nameChange"/>
+        <input name="logname" placeholder="输入ID或用户名登录" class="text" type="text" @input="nameChange" />
       </div>
       <div class="input_outer">
         <span class="us_uer"></span>
         <input name="logpass" class="text" type="password" placeholder="输入密码" @input="pwdChange" />
       </div>
       <div class="mb2">
-        <a class="act-but submit" href="javascript:;" style="color: rgb(47, 167, 46)" @click="login">登录</a>
+        <a
+          class="act-but submit"
+          href="javascript:;"
+          style="color: rgb(47, 167, 46)"
+          @click="login"
+        >登录</a>
       </div>
     </div>
 
     <div class="sas">
-      还没有账号，<a href="javascript:;" @click="toRegister" style="color: rgb(47, 167, 46)">去注册</a>
+      还没有账号，
+      <a href="javascript:;" @click="toRegister" style="color: rgb(47, 167, 46)">去注册</a>
     </div>
   </div>
 </template>
 
 <script>
-import { login } from '../actions/interface.js';
-import { setCookie } from '../utils/util.js';
+import { login } from "../actions/interface.js";
+import { setCookie } from "../utils/util.js";
 export default {
-  data(){
+  data() {
     return {
-      password: '',
-      username: ''
-    }
+      password: "",
+      username: ""
+    };
   },
   methods: {
-    toRegister(){
-      this.$router.push({name: 'register'})
+    toRegister() {
+      this.$router.push({ name: "register" });
     },
-    nameChange(e){
+    nameChange(e) {
       this.username = e.target.value.trim();
     },
-    pwdChange(e){
+    pwdChange(e) {
       this.password = e.target.value.trim();
     },
-    login(){
+    login() {
       const that = this;
-      login(that.username,that.password).then(res => {
-        if(res && res.state === 'success'){
-          setCookie('token',res.data.token);
-          that.$store.commit('setToken', res.data.token);
-          setCookie('username',that.username);
-          that.$store.commit('setUsername', that.username);
-          that.$router.push({name: 'home'});
-        }else{
-          throw new Error(res && res.msg);
-        }
-      }).catch(e => {
-        console.log(e.message)
-      })
+      login(that.username, that.password)
+        .then(res => {
+          if (res && res.state === "success") {
+            setCookie("token", res.data.token);
+            that.$store.commit("setToken", res.data.token);
+            setCookie("username", that.username);
+            that.$store.commit("setUsername", that.username);
+            that.$router.push({ name: "home" });
+            //发送登录信息
+            this.$store.state.socket.emit("userLogin", {
+              avatar: res.data.avatar, 
+              username: res.data.username
+            });
+          } else {
+            throw new Error(res && res.msg);
+          }
+        })
+        .catch(e => {
+          console.log(e.message);
+        });
     }
   }
 };
@@ -148,7 +161,7 @@ export default {
     font-size: 20px;
     border-radius: 50px;
     background: #30343557;
-    &:hover{
+    &:hover {
       background: #36984357;
     }
   }

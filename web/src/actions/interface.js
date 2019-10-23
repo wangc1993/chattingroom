@@ -46,7 +46,23 @@ const login = (username,password) => {
     })
 }
 
+const getOnlineUserList = () => {
+    return fetch(`${baseURL}/getOnlineUserList`,{
+        method: 'GET',
+        headers: new Headers({
+            'Content-Type':'application/json;charset=utf-8',
+        })
+    }).then(res => {
+        return res.json();
+    }).then(json => {
+        return json;
+    }).catch(e => {
+        throw new Error(e.message);
+    })
+}
+
 export {
     register,
-    login
+    login,
+    getOnlineUserList
 }

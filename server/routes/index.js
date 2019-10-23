@@ -15,9 +15,9 @@ router.post('/register', async (ctx, next) => {
   const serchInfo = await User.findOne({
     username
   });
-  if(serchInfo){
+  if (serchInfo) {
     setResponse(ctx, 'fail', '用户名已存在');
-  }else{
+  } else {
     /*用户名不存在,保存数据库*/
     let user = new User({
       username,
@@ -25,9 +25,9 @@ router.post('/register', async (ctx, next) => {
     });
     const saveInfo = user.save();
     /*判断是否保存成功*/
-    if(saveInfo){
+    if (saveInfo) {
       setResponse(ctx, 'success', '注册成功');
-    }else{
+    } else {
       setResponse(ctx, 'fail', '注册失败');
     }
   }
@@ -38,16 +38,24 @@ router.post('/login', async (ctx, next) => {
   const serchInfo = await User.findOne({
     username
   });
-  if(serchInfo){
-    if(serchInfo.password === password){
+  if (serchInfo) {
+    if (serchInfo.password === password) {
       const authToken = setToken(username);
-      setResponse(ctx, 'success', '登录成功', {token: authToken});
-    }else{
+      setResponse(ctx, 'success', '登录成功', {
+        token: authToken, 
+        avatar: serchInfo.avatar, 
+        username: serchInfo.username 
+      });
+    } else {
       setResponse(ctx, 'fail', '密码不正确');
     }
-  }else{
+  } else {
     setResponse(ctx, 'fail', '用户名不存在');
   }
 });
+//获取当前在线用户
+router.get('/getOnlineUserList', async (ctx, next) => {
+  setResponse(ctx, 'success', '在线用户获取成功',global.onlineUserList);
+})
 
 module.exports = router;
