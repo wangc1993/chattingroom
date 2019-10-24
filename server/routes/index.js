@@ -55,7 +55,7 @@ router.post('/login', async (ctx, next) => {
 });
 //获取当前在线用户
 router.get('/getOnlineUserList', async (ctx, next) => {
-  setResponse(ctx, 'success', '在线用户获取成功',global.onlineUserList);
+  setResponse(ctx, 'success', '在线用户获取成功',ctx.onlineUserList);
 })
 
 module.exports = router;

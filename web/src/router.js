@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Home from './views/Home.vue'
+import { getCookie } from './utils/util';
 
 Vue.use(Router)
 
@@ -30,7 +31,22 @@ const router = new Router({
 })
 
 router.beforeEach((to, from, next) => {
-  next()
+  let username = getCookie('username') || '';
+  if(username){
+    //已登录
+    if(to.name !== 'home'){
+      next({path: '/'})
+    }else{
+      next()
+    }
+  }else{
+    //未登录
+    if(to.name === 'register' || to.name === 'login'){
+      next();
+    }else{
+      next({path: '/login'})
+    }
+  }
 })
 
 export default router;

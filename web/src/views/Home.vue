@@ -23,11 +23,19 @@
       </div>
       <div class="contacts">
         <h1>
-          在线人员(
-          <span id="num">{{onlineUserList.length}}</span>)
+          当前在线
+          <span id="num">({{onlineUserList.length}})</span>
         </h1>
-        <ul id="users"></ul>
-        <p>当前无人在线哟~</p>
+        <div class="users">
+          <div v-for="(user, index) in onlineUserList" :key="index" class="user">
+            <img
+              :src="baseServerUrl + '/' + (user.avatar ? user.avatar : 'default.jpg')"
+              :alt="user.username"
+            />
+            <span :title="user.username">{{user.username}}</span>
+          </div>
+        </div>
+        <p v-show="onlineUserList.length > 0 ? false : true">当前无人在线哟~</p>
       </div>
     </div>
   </div>
@@ -35,26 +43,34 @@
 
 <script>
 import { getOnlineUserList } from "../actions/interface.js";
+import { sortToTop } from '../utils/util';
 export default {
   data() {
     return {
-      onlineUserList: []
+      onlineUserList: [],
+      baseServerUrl: "http://localhost:3005"
     };
   },
+  methods: {
+    getOnlineUserList: function() {
+      getOnlineUserList()
+        .then(res => {
+          if (res && res.state === "success") {  
+            this.onlineUserList = sortToTop(res.data);
+          } else {
+            throw new Error(res && res.msg);
+          }
+        })
+        .catch(e => {
+          console.log(e.message);
+        });
+    }
+  },
   created() {
-    getOnlineUserList()
-      .then(res => {
-        if (res && res.state === "success") {
-          this.onlineUserList = res.data;
-        } else {
-          throw new Error(res && res.msg);
-        }
-      })
-      .catch(e => {
-        console.log(e.message);
-      });
+    //获取在线用户列表
+    this.getOnlineUserList();
     this.$store.state.socket.on("onlineUserChange", data => {
-      this.onlineUserList = data;
+      this.onlineUserList = sortToTop(data);
     });
   }
 };
@@ -172,30 +188,30 @@ export default {
         font-weight: 500;
         margin-bottom: 10px;
       }
-      ul {
+      .users {
         width: 100%;
-        li {
-          display: inline-block;
-          width: 23%;
-          margin-right: 2%;
-          height: 65px;
-          text-align: center;
-          margin-bottom: 5px;
+        display: flex;
+        flex-wrap: wrap;
+        .user {
+          width: 25%;
+          height: 70px;
           img {
             width: 100%;
-            height: 45.5px;
+            height: 50px;
+          }
+          span {
+            display: inline-block;
+            height: 20px;
+            line-height: 20px;
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            &:hover {
+              cursor: pointer;
+            }
           }
         }
-      }
-      li > span {
-        display: inline-block;
-        width: 100%;
-        font-size: 13px;
-        line-height: 20px;
-        vertical-align: middle;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        overflow: hidden;
       }
       p {
         text-align: center;

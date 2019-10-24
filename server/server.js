@@ -23,7 +23,7 @@ let io = require('socket.io')(http);
 // 由于做了跨域,所以前端用post请求后台接口的时候,会有预检,及时options请求,解决的方法,在nodejs里对options的请求直接返回200
 server.use(async (ctx, next) => {
     ctx.set('Access-Control-Allow-Origin', '*');
-    ctx.set('Access-Control-Allow-Headers', 'Content-Type, Content-Length, Authorization, Accept, X-Requested-With , yourHeaderFeild');
+    ctx.set('Access-Control-Allow-Headers', 'Content-Type, Content-Length, Token, Accept, X-Requested-With , yourHeaderFeild');
     ctx.set('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
     if (ctx.method == 'OPTIONS') {
         ctx.body = 200;
@@ -31,6 +31,10 @@ server.use(async (ctx, next) => {
         await next();
     }
 });
+
+/*设置路由中间件，静态页面。将静态资源文件所在的目录作为参数传递给static 中间件就可以提供静态资源文件的访问了,就像apache里的www下的文件*/
+const static = require('koa-static');
+server.use(static(__dirname + '/avatar'));
 
 //权限错误处理
 server.use((ctx, next) => {
@@ -61,18 +65,18 @@ const index = require('./routes/index');
 //校验请求的方法
 server.use(index.routes(), index.allowedMethods())
 
-//在线用户
-global.onlineUserList = [];
+//在线用户,koa.context是从其创建ctx的原型。您可以通过编辑koa.context为ctx添加其他属性。
+server.context.onlineUserList = [];
 // 监听连接事件
 io.on('connection', socket => {
     console.log('初始化成功！下面可以用socket绑定事件和触发事件了');
     socket.on('userLogin', data => {
         const equalUser = R.filter((user) => {
             return user.username === data.username
-        }, global.onlineUserList);
+        }, server.context.onlineUserList);
         if (equalUser.length < 1) {
-            global.onlineUserList.push(data);
-            socket.emit("onlineUserChange", global.onlineUserList);
+            server.context.onlineUserList.push(data);
+            socket.emit("onlineUserChange", server.context.onlineUserList);
         }
     })
 });

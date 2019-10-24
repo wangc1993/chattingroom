@@ -4,7 +4,7 @@
 * @Last Modified by:   Carrey Wang
 * @Last Modified time: 2019-10-16 22:30:34
 */
-
+import { getCookie } from '../utils/util';
 // const baseURL = 'http://10.254.2.95:7002/mock/450';
 const baseURL = 'http://localhost:3005';
 
@@ -51,6 +51,7 @@ const getOnlineUserList = () => {
         method: 'GET',
         headers: new Headers({
             'Content-Type':'application/json;charset=utf-8',
+            'token': getCookie('token') || ''
         })
     }).then(res => {
         return res.json();
