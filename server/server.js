@@ -65,6 +65,15 @@ const index = require('./routes/index');
 //校验请求的方法
 server.use(index.routes(), index.allowedMethods())
 
+//文件传输默认配置
+const koaBody = require('koa-body');
+server.use(koaBody({
+    multipart: true,
+    formidable: {
+        maxFileSize: 200*1024*1024    // 设置上传文件大小最大限制，默认2M
+    }
+}));
+
 //在线用户,koa.context是从其创建ctx的原型。您可以通过编辑koa.context为ctx添加其他属性。
 server.context.onlineUserList = [];
 // 监听连接事件

@@ -38,13 +38,18 @@
         <p v-show="onlineUserList.length > 0 ? false : true">当前无人在线哟~</p>
       </div>
     </div>
+    <ModifyUserAvatarDialog />
   </div>
 </template>
 
 <script>
 import { getOnlineUserList } from "../actions/interface.js";
-import { sortToTop } from '../utils/util';
+import { sortToTop } from "../utils/util";
+import ModifyUserAvatarDialog from "../components/dialog/modifyUserAvatar";
 export default {
+  components: {
+    ModifyUserAvatarDialog
+  },
   data() {
     return {
       onlineUserList: [],
@@ -55,7 +60,7 @@ export default {
     getOnlineUserList: function() {
       getOnlineUserList()
         .then(res => {
-          if (res && res.state === "success") {  
+          if (res && res.state === "success") {
             this.onlineUserList = sortToTop(res.data);
           } else {
             throw new Error(res && res.msg);

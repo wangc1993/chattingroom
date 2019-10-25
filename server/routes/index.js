@@ -6,6 +6,7 @@
 */
 const { setResponse, setToken } = require('../utils/util');
 const router = require('koa-router')();
+const fs = require('fs');
 /*通过用户模型类操作数据库*/
 let User = require('../models/user.js');
 
@@ -42,9 +43,9 @@ router.post('/login', async (ctx, next) => {
     if (serchInfo.password === password) {
       const authToken = setToken(username);
       setResponse(ctx, 'success', '登录成功', {
-        token: authToken, 
-        avatar: serchInfo.avatar, 
-        username: serchInfo.username 
+        token: authToken,
+        avatar: serchInfo.avatar,
+        username: serchInfo.username
       });
     } else {
       setResponse(ctx, 'fail', '密码不正确');
@@ -55,7 +56,30 @@ router.post('/login', async (ctx, next) => {
 });
 //获取当前在线用户
 router.get('/getOnlineUserList', async (ctx, next) => {
-  setResponse(ctx, 'success', '在线用户获取成功',ctx.onlineUserList);
+  setResponse(ctx, 'success', '在线用户获取成功', ctx.onlineUserList);
 })
-
+//上传头像
+router.post('/modifyUserAvatar', async (ctx, next) => {
+  const { username } = ctx.request.body;
+  // 获取上传文件
+  const file = ctx.request.files.file;
+  const serchInfo = await User.findOne({
+    username
+  });
+  //判断用户是否存在
+  if (serchInfo) {
+    // 创建可读流
+    const reader = fs.createReadStream(file.path);
+    // 获取上传文件扩展名
+    const ext = file.name.split('.').pop();
+    let filePath = path.join(__dirname, 'avatar/user/') + `${username + '.' + ext}`;
+    // 创建可写流
+    const upStream = fs.createWriteStream(filePath);
+    // 可读流通过管道写入可写流
+    reader.pipe(upStream);
+    setResponse(ctx, 'success', '头像上传成功');
+  } else {
+    setResponse(ctx, 'fail', '用户名不存在');
+  }
+});
 module.exports = router;
