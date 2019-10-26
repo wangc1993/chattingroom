@@ -2,13 +2,19 @@
 * @Author: Carrey Wang
 * @Date:   2019-10-19 13:29:57
 * @Last Modified by:   Carrey Wang
-* @Last Modified time: 2019-10-20 16:05:34
+* @Last Modified time: 2019-10-26 14:39:54
 */
 const R = require('ramda');
 const Koa = require('koa');
 const server = new Koa();
-const bodyParser = require('koa-bodyparser');
-server.use(bodyParser());
+//文件传输默认配置(放在路由前)
+const koaBody = require('koa-body');
+server.use(koaBody({
+    multipart: true,
+    formidable: {
+        maxFileSize: 51200    // 设置上传文件大小最大限制，默认2M
+    }
+}));
 /*加载数据库模块*/
 let mongoose = require('mongoose');
 //路由权限控制
@@ -19,7 +25,7 @@ const jwtSecret = 'chattingroom';
 let http = require('http').createServer(server);
 let io = require('socket.io')(http);
 
-// 跨域设置 
+// 跨域设置
 // 由于做了跨域,所以前端用post请求后台接口的时候,会有预检,及时options请求,解决的方法,在nodejs里对options的请求直接返回200
 server.use(async (ctx, next) => {
     ctx.set('Access-Control-Allow-Origin', '*');
@@ -31,6 +37,7 @@ server.use(async (ctx, next) => {
         await next();
     }
 });
+
 
 /*设置路由中间件，静态页面。将静态资源文件所在的目录作为参数传递给static 中间件就可以提供静态资源文件的访问了,就像apache里的www下的文件*/
 const static = require('koa-static');
@@ -65,14 +72,6 @@ const index = require('./routes/index');
 //校验请求的方法
 server.use(index.routes(), index.allowedMethods())
 
-//文件传输默认配置
-const koaBody = require('koa-body');
-server.use(koaBody({
-    multipart: true,
-    formidable: {
-        maxFileSize: 200*1024*1024    // 设置上传文件大小最大限制，默认2M
-    }
-}));
 
 //在线用户,koa.context是从其创建ctx的原型。您可以通过编辑koa.context为ctx添加其他属性。
 server.context.onlineUserList = [];

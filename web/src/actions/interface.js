@@ -2,7 +2,7 @@
 * @Author: Carrey Wang
 * @Date:   2019-10-16 21:48:23
 * @Last Modified by:   Carrey Wang
-* @Last Modified time: 2019-10-16 22:30:34
+* @Last Modified time: 2019-10-25 22:49:00
 */
 import { getCookie } from '../utils/util';
 // const baseURL = 'http://10.254.2.95:7002/mock/450';
@@ -62,8 +62,25 @@ const getOnlineUserList = () => {
     })
 }
 
+const uploadAvatar = (file) => {
+    return fetch(`${baseURL}/modifyUserAvatar`,{
+        method: 'POST',
+        headers: new Headers({
+            'token': getCookie('token') || ''
+        }),
+        body: file
+    }).then(res => {
+        return res.json();
+    }).then(json => {
+        return json;
+    }).catch(e => {
+        throw new Error(e.message);
+    })
+}
+
 export {
     register,
     login,
-    getOnlineUserList
+    getOnlineUserList,
+    uploadAvatar
 }

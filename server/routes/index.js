@@ -2,11 +2,13 @@
 * @Author: Carrey Wang
 * @Date:   2019-10-19 13:52:54
 * @Last Modified by:   Carrey Wang
-* @Last Modified time: 2019-10-20 16:11:48
+* @Last Modified time: 2019-10-26 14:41:01
 */
 const { setResponse, setToken } = require('../utils/util');
 const router = require('koa-router')();
 const fs = require('fs');
+const path = require('path');
+
 /*通过用户模型类操作数据库*/
 let User = require('../models/user.js');
 
@@ -72,7 +74,7 @@ router.post('/modifyUserAvatar', async (ctx, next) => {
     const reader = fs.createReadStream(file.path);
     // 获取上传文件扩展名
     const ext = file.name.split('.').pop();
-    let filePath = path.join(__dirname, 'avatar/user/') + `${username + '.' + ext}`;
+    let filePath = path.join(__dirname, '/../avatar/user/') + `${username + '.' + ext}`;
     // 创建可写流
     const upStream = fs.createWriteStream(filePath);
     // 可读流通过管道写入可写流

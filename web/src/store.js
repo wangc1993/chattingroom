@@ -10,6 +10,7 @@ export default new Vuex.Store({
   state: {
     username: getCookie('username') ? getCookie('username') : '',
     token: getCookie('token') ? getCookie('token') : '',
+    showUploadVisible: false,
     socket
   },
   mutations: {
@@ -18,6 +19,9 @@ export default new Vuex.Store({
     },
     setToken(state, value) {
       state.token = value;
+    },
+    setUploadModal(state, bool){
+      state.showUploadVisible = bool;
     }
   },
   actions: {

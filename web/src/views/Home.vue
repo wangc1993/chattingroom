@@ -27,18 +27,18 @@
           <span id="num">({{onlineUserList.length}})</span>
         </h1>
         <div class="users">
-          <div v-for="(user, index) in onlineUserList" :key="index" class="user">
+          <div v-for="(user, index) in onlineUserList" :key="index" class="user" >
             <img
               :src="baseServerUrl + '/' + (user.avatar ? user.avatar : 'default.jpg')"
               :alt="user.username"
             />
-            <span :title="user.username">{{user.username}}</span>
+            <span :title="user.username" @click="showUploadModal(index)">{{user.username}}</span>
           </div>
         </div>
         <p v-show="onlineUserList.length > 0 ? false : true">当前无人在线哟~</p>
       </div>
     </div>
-    <ModifyUserAvatarDialog />
+    <ModifyUserAvatarDialog v-show="$store.state.showUploadVisible"/>
   </div>
 </template>
 
@@ -69,6 +69,11 @@ export default {
         .catch(e => {
           console.log(e.message);
         });
+    },
+    showUploadModal: function(index){
+      if(index === 0){
+        this.$store.commit("setUploadModal", true);
+      }
     }
   },
   created() {
