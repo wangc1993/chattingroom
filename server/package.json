@@ -11,7 +11,7 @@
     "mongoose": "^5.7.5",
     "nodemon": "^1.19.4",
     "ramda": "^0.26.1",
-    "socket.io": "^2.3.0"
+    "socket.io": "^2.1.1"
   },
   "scripts": {
     "start": "nodemon server.js"

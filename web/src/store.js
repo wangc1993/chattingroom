@@ -3,7 +3,7 @@ import Vuex from 'vuex'
 import { getCookie } from './utils/util.js';
 import io from "socket.io-client";
 /*全双工通信*/
-const socket = io("http://localhost:3006");
+const socket = io("http://192.168.0.103:3005");
 Vue.use(Vuex)
 
 export default new Vuex.Store({
@@ -20,6 +20,7 @@ export default new Vuex.Store({
     setToken(state, value) {
       state.token = value;
     },
+    //控制上传弹窗是否显示
     setUploadModal(state, bool){
       state.showUploadVisible = bool;
     }

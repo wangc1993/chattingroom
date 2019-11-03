@@ -2,7 +2,7 @@
 * @Author: Carrey Wang
 * @Date:   2019-10-19 13:52:54
 * @Last Modified by:   Carrey Wang
-* @Last Modified time: 2019-10-26 14:41:01
+* @Last Modified time: 2019-11-03 12:58:14
 */
 const { setResponse, setToken } = require('../utils/util');
 const router = require('koa-router')();
@@ -79,9 +79,32 @@ router.post('/modifyUserAvatar', async (ctx, next) => {
     const upStream = fs.createWriteStream(filePath);
     // 可读流通过管道写入可写流
     reader.pipe(upStream);
-    setResponse(ctx, 'success', '头像上传成功');
+    //更新用户信息
+    const updateInfo = await User.update({
+      username
+    },{
+      avatar: `user/${username + '.' + ext}`
+    });
+    if(updateInfo){
+      setResponse(ctx, 'success', '头像上传成功');
+    }else{
+      setResponse(ctx, 'fail', '头像上传失败');
+    }
   } else {
     setResponse(ctx, 'fail', '用户名不存在');
   }
 });
+//自动登录
+router.get('/autoLogin', async (ctx, next) => {
+  const { username } = ctx.request.query;
+  /*判断用户名是否存在*/
+  const serchInfo = await User.findOne({
+    username
+  });
+  if(serchInfo){
+    setResponse(ctx, 'success', '自动登录成功', serchInfo);
+  }else{
+    setResponse(ctx, 'fail', '自动登录失败');
+  }
+})
 module.exports = router;

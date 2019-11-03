@@ -2,7 +2,7 @@
 * @Author: Carrey Wang
 * @Date:   2019-10-16 21:48:23
 * @Last Modified by:   Carrey Wang
-* @Last Modified time: 2019-10-25 22:49:00
+* @Last Modified time: 2019-11-02 20:35:45
 */
 import { getCookie } from '../utils/util';
 // const baseURL = 'http://10.254.2.95:7002/mock/450';
@@ -78,9 +78,43 @@ const uploadAvatar = (file) => {
     })
 }
 
+const logOut = (username) => {
+    return fetch(`${baseURL}/logOut?username=${username}`,{
+        method: 'GET',
+        headers: new Headers({
+            'Content-Type':'application/json;charset=utf-8',
+            'token': getCookie('token') || ''
+        })
+    }).then(res => {
+        return res.json();
+    }).then(json => {
+        return json;
+    }).catch(e => {
+        throw new Error(e.message);
+    })
+}
+
+const autoLogin = (username) => {
+    return fetch(`${baseURL}/autoLogin?username=${username}`,{
+        method: 'GET',
+        headers: new Headers({
+            'Content-Type':'application/json;charset=utf-8',
+            'token': getCookie('token') || ''
+        })
+    }).then(res => {
+        return res.json();
+    }).then(json => {
+        return json;
+    }).catch(e => {
+        throw new Error(e.message);
+    })
+}
+
 export {
     register,
     login,
     getOnlineUserList,
-    uploadAvatar
+    uploadAvatar,
+    logOut,
+    autoLogin
 }

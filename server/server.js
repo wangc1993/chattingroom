@@ -2,7 +2,7 @@
 * @Author: Carrey Wang
 * @Date:   2019-10-19 13:29:57
 * @Last Modified by:   Carrey Wang
-* @Last Modified time: 2019-10-26 14:39:54
+* @Last Modified time: 2019-11-03 12:55:06
 */
 const R = require('ramda');
 const Koa = require('koa');
@@ -21,9 +21,19 @@ let mongoose = require('mongoose');
 const koaJwt = require('koa-jwt')
 // 定义签名
 const jwtSecret = 'chattingroom';
-/*socket.io公式*/
-let http = require('http').createServer(server);
+/*socket.io公式,server后面要加callback*/
+let http = require('http').createServer(server.callback());
 let io = require('socket.io')(http);
+//新增在线用户
+const addOnlineUser = (data) => {
+    const equalUser = R.filter((user) => {
+        return user.username === data.username
+    }, server.context.onlineUserList);
+    if (equalUser.length < 1) {
+        server.context.onlineUserList.push(data);
+        io.emit("onlineUserAdd", server.context.onlineUserList);
+    }
+}
 
 // 跨域设置
 // 由于做了跨域,所以前端用post请求后台接口的时候,会有预检,及时options请求,解决的方法,在nodejs里对options的请求直接返回200
@@ -79,14 +89,21 @@ server.context.onlineUserList = [];
 io.on('connection', socket => {
     console.log('初始化成功！下面可以用socket绑定事件和触发事件了');
     socket.on('userLogin', data => {
-        const equalUser = R.filter((user) => {
-            return user.username === data.username
-        }, server.context.onlineUserList);
-        if (equalUser.length < 1) {
-            server.context.onlineUserList.push(data);
-            socket.emit("onlineUserChange", server.context.onlineUserList);
+        addOnlineUser(data);
+    })
+    socket.on('autoLogin', data => {
+        addOnlineUser(data);
+    })
+    socket.on('logOut', data => {
+        const userIndex = R.findIndex(R.propEq('username', data.username))(server.context.onlineUserList);
+        if(userIndex !== -1){
+            server.context.onlineUserList.splice(userIndex, 1);
+            io.emit("onlineUserReduce", server.context.onlineUserList);
         }
     })
+    socket.on('disconnect', async function () {
+        console.log('SOCKET->disconnect:');
+    });
 });
 
 /*连接数据库*/
@@ -99,11 +116,11 @@ mongoose.connect('mongodb://localhost:27017/chattingroom', {
         console.log("数据库连接成功！");
         /*警告：server.listen在这里socket不起作用！会报404*/
         // http.listen(8081);
-        server.listen(3005, () => {
+        http.listen(3005, () => {
             console.log('服务启动在3005端口！')
         })
-        http.listen(3006, () => {
-            console.log('websocket启动在3006端口！')
-        })
+        // http.listen(3006, () => {
+        //     console.log('websocket启动在3006端口！')
+        // })
     }
 });

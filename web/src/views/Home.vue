@@ -1,8 +1,13 @@
 <template>
   <div class="main">
     <div class="header">
-      <img src="../assets/room.jpg" />
-      欢迎来到解压聊天室
+      <div class="left">
+        <img src="../assets/room.jpg" />
+        欢迎来到解压聊天室
+      </div>
+      <div class="right">
+        <span @click="logOut">登出</span>
+      </div>
     </div>
     <div class="container">
       <div class="conversation">
@@ -44,7 +49,7 @@
 
 <script>
 import { getOnlineUserList } from "../actions/interface.js";
-import { sortToTop } from "../utils/util";
+import { sortToTop, delCookie } from "../utils/util";
 import ModifyUserAvatarDialog from "../components/dialog/modifyUserAvatar";
 export default {
   components: {
@@ -74,13 +79,29 @@ export default {
       if(index === 0){
         this.$store.commit("setUploadModal", true);
       }
+    },
+    logOut: function() {
+      const username = this.$store.state.username;
+      this.$store.commit("setUsername", '');
+      this.$store.commit("setToken", '');
+      delCookie('username');
+      delCookie('token');
+      this.$router.push({ name: "login" });
+      this.$store.state.socket.emit("logOut", {
+        username
+      });
     }
   },
-  created() {
+  mounted() {
     //获取在线用户列表
     this.getOnlineUserList();
-    this.$store.state.socket.on("onlineUserChange", data => {
+    this.$store.state.socket.on("onlineUserAdd", data => {
       this.onlineUserList = sortToTop(data);
+    });
+    this.$store.state.socket.on("onlineUserReduce", data => {
+      if(data.length > 0){
+        this.onlineUserList = sortToTop(data);
+      }
     });
   }
 };
@@ -122,14 +143,28 @@ export default {
     line-height: 85px;
     text-align: left;
     padding-left: 10px;
+    padding-right: 10px;
     border-bottom: 2px solid #eee;
     font-size: 23px;
     color: #555;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     img {
       width: 50px;
       height: 50px;
       border-radius: 25px;
       vertical-align: middle;
+    }
+    .right{
+      span{
+        font-size: 16px;
+        color: #ddd;
+        &:hover{
+          cursor: pointer;
+          color: #000;
+        }
+      }
     }
   }
   .container {
@@ -208,6 +243,7 @@ export default {
           img {
             width: 100%;
             height: 50px;
+            border-radius: 50%;
           }
           span {
             display: inline-block;

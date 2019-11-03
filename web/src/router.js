@@ -1,7 +1,8 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Home from './views/Home.vue'
-import { getCookie } from './utils/util';
+import { getCookie, delCookie } from './utils/util';
+import { autoLogin } from './actions/interface.js';
 
 Vue.use(Router)
 
@@ -33,11 +34,28 @@ const router = new Router({
 router.beforeEach((to, from, next) => {
   let username = getCookie('username') || '';
   if(username){
-    //已登录
     if(to.name !== 'home'){
       next({path: '/'})
     }else{
-      next()
+      //自动登录
+      autoLogin(username).then(res => {
+        if (res && res.state === "success") {
+          router.app.$store.state.socket.emit("autoLogin", {
+            avatar: res.data.avatar,
+            username: res.data.username
+          });
+          next();
+        } else {
+          router.app.$store.commit("setUsername", '');
+          router.app.$store.commit("setToken", '');
+          delCookie('username');
+          delCookie('token');
+          next({path: '/login'})
+          throw new Error(res && res.msg);
+        }
+      }).catch(e => {
+          console.log(e.message);
+      });
     }
   }else{
     //未登录
