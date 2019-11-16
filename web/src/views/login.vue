@@ -59,7 +59,7 @@ export default {
             that.$router.push({ name: "home" });
             //发送登录信息
             this.$store.state.socket.emit("userLogin", {
-              avatar: res.data.avatar, 
+              avatar: res.data.avatar,
               username: res.data.username
             });
           } else {
@@ -67,7 +67,7 @@ export default {
           }
         })
         .catch(e => {
-          console.log(e.message);
+          alert(e.message);
         });
     }
   }

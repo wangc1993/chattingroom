@@ -48,7 +48,7 @@ export default {
           throw new Error(res && res.msg);
         }
       }).catch(e => {
-        console.log(e.message)
+        alert(e.message)
       })
     }
   }

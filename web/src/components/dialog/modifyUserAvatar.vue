@@ -81,12 +81,21 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@keyframes apper {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
 .dialog {
   position: fixed;
   height: 100%;
   width: 100%;
   top: 0;
   left: 0;
+  animation: apper 0.5s;
   .dialog-cover {
     position: fixed;
     height: 100%;

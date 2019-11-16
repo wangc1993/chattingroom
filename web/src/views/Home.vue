@@ -1,5 +1,5 @@
 <template>
-  <div class="main">
+  <div :class="(shakingVisible ? 'main shaking' : 'main')">
     <div class="header">
       <div class="left">
         <img src="../assets/room.jpg" />
@@ -15,9 +15,15 @@
         <ul class="messages"></ul>
         <!-- 操作栏 -->
         <div class="extra">
-          <div class="emoji"></div>
-          <div class="shake"></div>
-          <div class="pic"></div>
+          <div class="emoji">
+            <img src="../assets/smile.svg" alt="">
+          </div>
+          <div class="shake" @click="shaking">
+            <img src="../assets/light.svg" alt="">
+          </div>
+          <div class="pic">
+            <img src="../assets/picture.svg" alt="">
+          </div>
         </div>
         <!-- autocomplete禁用自动完成功能 -->
         <textarea class="m" autofocus></textarea>
@@ -58,7 +64,8 @@ export default {
   data() {
     return {
       onlineUserList: [],
-      baseServerUrl: "http://localhost:3005"
+      baseServerUrl: "http://localhost:3005",
+      shakingVisible: false
     };
   },
   methods: {
@@ -72,7 +79,7 @@ export default {
           }
         })
         .catch(e => {
-          console.log(e.message);
+          alert(e.message);
         });
     },
     showUploadModal: function(index){
@@ -90,6 +97,11 @@ export default {
       this.$store.state.socket.emit("logOut", {
         username
       });
+    },
+    shaking: function(){
+      this.$store.state.socket.emit("shaking", {
+        username: this.$store.state.username
+      });
     }
   },
   mounted() {
@@ -103,6 +115,16 @@ export default {
         this.onlineUserList = sortToTop(data);
       }
     });
+    //窗口抖动判断
+    this.$store.state.socket.on("shaking", (data) => {
+      const that = this;
+      if(data.username !== that.$store.state.username){
+        that.shakingVisible = true;
+        setTimeout(function(){
+          that.shakingVisible = false;
+        }, 1000)
+      }
+    });
   }
 };
 </script>
@@ -112,16 +134,16 @@ export default {
 }
 @keyframes run {
   0% {
-    left: 0;
+    left: 49%;
   }
   25% {
-    left: -7px;
+    left: 50%;
   }
   50% {
-    left: 7px;
+    left: 51%;
   }
   100% {
-    left: 0;
+    left: 50%;
   }
 }
 .main {
@@ -174,9 +196,27 @@ export default {
       width: 490px;
     }
     .extra {
-      height: 30px;
+      height: 32px;
       width: 100%;
       border-top: 1px solid #eee;
+      text-align: left;
+      padding-left: 10px;
+      display: flex;
+      align-items: center;
+      div{
+        height: 32px;
+        line-height: 32px;
+        display: flex;
+        margin: 0 4px;
+        align-items: center;
+        img{
+          width: 20px;
+          height: 20px;
+          &:hover{
+            cursor: pointer;
+          }
+        }
+      }
     }
     .messages {
       height: 350px;
@@ -244,6 +284,7 @@ export default {
             width: 100%;
             height: 50px;
             border-radius: 50%;
+            padding: 6px;
           }
           span {
             display: inline-block;

@@ -2,7 +2,7 @@
 * @Author: Carrey Wang
 * @Date:   2019-10-19 13:29:57
 * @Last Modified by:   Carrey Wang
-* @Last Modified time: 2019-11-03 12:55:06
+* @Last Modified time: 2019-11-16 21:08:58
 */
 const R = require('ramda');
 const Koa = require('koa');
@@ -100,6 +100,9 @@ io.on('connection', socket => {
             server.context.onlineUserList.splice(userIndex, 1);
             io.emit("onlineUserReduce", server.context.onlineUserList);
         }
+    })
+    socket.on('shaking', (data) => {
+        io.emit("shaking", data);
     })
     socket.on('disconnect', async function () {
         console.log('SOCKET->disconnect:');
