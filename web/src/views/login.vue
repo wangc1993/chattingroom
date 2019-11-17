@@ -4,11 +4,25 @@
     <div class="form">
       <div class="input_outer">
         <span class="u_user"></span>
-        <input name="logname" placeholder="输入ID或用户名登录" class="text" type="text" @input="nameChange" />
+        <input
+          name="logname"
+          placeholder="输入ID或用户名登录"
+          class="text"
+          type="text"
+          @keydown="enter"
+          @input="nameChange"
+        />
       </div>
       <div class="input_outer">
         <span class="us_uer"></span>
-        <input name="logpass" class="text" type="password" placeholder="输入密码" @input="pwdChange" />
+        <input
+          name="logpass"
+          class="text"
+          type="password"
+          placeholder="输入密码"
+          @keydown="enter"
+          @input="pwdChange"
+        />
       </div>
       <div class="mb2">
         <a
@@ -47,28 +61,37 @@ export default {
     pwdChange(e) {
       this.password = e.target.value.trim();
     },
+    enter(e) {
+      if (e.keyCode === 13) {
+        this.login();
+      }
+    },
     login() {
       const that = this;
-      login(that.username, that.password)
-        .then(res => {
-          if (res && res.state === "success") {
-            setCookie("token", res.data.token);
-            that.$store.commit("setToken", res.data.token);
-            setCookie("username", that.username);
-            that.$store.commit("setUsername", that.username);
-            that.$router.push({ name: "home" });
-            //发送登录信息
-            this.$store.state.socket.emit("userLogin", {
-              avatar: res.data.avatar,
-              username: res.data.username
-            });
-          } else {
-            throw new Error(res && res.msg);
-          }
-        })
-        .catch(e => {
-          alert(e.message);
-        });
+      if (that.username) {
+        login(that.username, that.password)
+          .then(res => {
+            if (res && res.state === "success") {
+              setCookie("token", res.data.token);
+              that.$store.commit("setToken", res.data.token);
+              setCookie("username", that.username);
+              that.$store.commit("setUsername", that.username);
+              that.$router.push({ name: "home" });
+              //发送登录信息
+              this.$store.state.socket.emit("userLogin", {
+                avatar: res.data.avatar,
+                username: res.data.username
+              });
+            } else {
+              throw new Error(res && res.msg);
+            }
+          })
+          .catch(e => {
+            alert(e.message);
+          });
+      } else {
+        alert("用户名不能为空");
+      }
     }
   }
 };

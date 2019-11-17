@@ -4,25 +4,45 @@
     <div class="form">
       <div class="input_outer">
         <span class="u_user"></span>
-        <input name="logname" placeholder="输入ID或用户名注册" class="text" type="text" @input="nameChange"/>
+        <input
+          name="logname"
+          placeholder="输入ID或用户名注册"
+          class="text"
+          type="text"
+          @keydown="enter"
+          @input="nameChange"
+        />
       </div>
       <div class="input_outer">
         <span class="us_uer"></span>
-        <input name="logpass" class="text" type="password" placeholder="输入密码" @input="pwdChange"/>
+        <input
+          name="logpass"
+          class="text"
+          type="password"
+          placeholder="输入密码"
+          @keydown="enter"
+          @input="pwdChange"
+        />
       </div>
       <div class="mb2">
-        <a class="act-but submit" href="javascript:;" style="color: rgb(47, 167, 46)" @click="register">注册</a>
+        <a
+          class="act-but submit"
+          href="javascript:;"
+          style="color: rgb(47, 167, 46)"
+          @click="register"
+        >注册</a>
       </div>
     </div>
 
     <div class="sas">
-      已有账号，<a href="javascript:;" @click="toLogin" style="color: rgb(47, 167, 46)">去登陆</a>
+      已有账号，
+      <a href="javascript:;" @click="toLogin" style="color: rgb(47, 167, 46)">去登陆</a>
     </div>
   </div>
 </template>
 
 <script>
-import { register } from '../actions/interface.js';
+import { register } from "../actions/interface.js";
 export default {
   data() {
     return {
@@ -34,22 +54,33 @@ export default {
     toLogin() {
       this.$router.push({ name: "login" });
     },
-    nameChange(e){
+    nameChange(e) {
       this.username = e.target.value.trim();
     },
-    pwdChange(e){
+    pwdChange(e) {
       this.password = e.target.value.trim();
     },
-    register(){
-      register(this.username,this.password).then(res => {
-        if(res && res.state === 'success'){
-          this.$router.push({name: 'login'});
-        }else{
-          throw new Error(res && res.msg);
-        }
-      }).catch(e => {
-        alert(e.message)
-      })
+    enter(e) {
+      if (e.keyCode === 13) {
+        this.register();
+      }
+    },
+    register() {
+      if (this.username) {
+        register(this.username, this.password)
+          .then(res => {
+            if (res && res.state === "success") {
+              this.$router.push({ name: "login" });
+            } else {
+              throw new Error(res && res.msg);
+            }
+          })
+          .catch(e => {
+            alert(e.message);
+          });
+      } else {
+        alert("用户名不能为空");
+      }
     }
   }
 };
