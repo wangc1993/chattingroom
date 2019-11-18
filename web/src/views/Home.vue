@@ -17,6 +17,11 @@
         <div class="extra">
           <div class="emoji">
             <img src="../assets/smile.svg" alt="">
+            <div class="emoji-container">
+              <div class="emoji-img" v-for='(value, key, index) in emojiList' :key="index">
+                <img :src="require(`../assets/emoji/${key}`)" :alt="value" @click="chooseEmoji(key, value)"/>
+              </div>
+            </div>
           </div>
           <div class="shake" @click="shaking">
             <img src="../assets/light.svg" alt="">
@@ -57,6 +62,7 @@
 import { getOnlineUserList } from "../actions/interface.js";
 import { sortToTop, delCookie } from "../utils/util";
 import ModifyUserAvatarDialog from "../components/dialog/modifyUserAvatar";
+import { emojiList } from '../consistant/emoji.js';
 export default {
   components: {
     ModifyUserAvatarDialog
@@ -65,7 +71,8 @@ export default {
     return {
       onlineUserList: [],
       baseServerUrl: "http://localhost:3005",
-      shakingVisible: false
+      shakingVisible: false,
+      emojiList
     };
   },
   methods: {
@@ -102,6 +109,9 @@ export default {
       this.$store.state.socket.emit("shaking", {
         username: this.$store.state.username
       });
+    },
+    chooseEmoji(key, value) {
+      console.log(key, value);
     }
   },
   mounted() {
@@ -214,6 +224,27 @@ export default {
           height: 20px;
           &:hover{
             cursor: pointer;
+          }
+        }
+      }
+      .emoji{
+        position: relative;
+        .emoji-container{
+          position: absolute;
+          width: 200px;
+          height: 200px;
+          display: flex;
+          flex-wrap: wrap;
+          background: #eee;
+          overflow: auto;
+          opacity: 0.5;
+          top: -200px;
+          left: -19px;
+          border-radius: 8px;
+          align-items: center;
+          justify-content: space-between;
+          .emoji-img{
+            width: 10%;
           }
         }
       }
