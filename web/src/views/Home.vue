@@ -15,9 +15,9 @@
         <ul class="messages"></ul>
         <!-- 操作栏 -->
         <div class="extra">
-          <div class="emoji">
+          <div class="emoji" @mouseover="emojiVisibleChange(true)" @mouseleave="emojiVisibleChange(false)">
             <img src="../assets/smile.svg" alt="">
-            <div class="emoji-container">
+            <div :class="(showEmoji ? 'emoji-container' : 'emoji-container hide')">
               <div class="emoji-img" v-for='(value, key, index) in emojiList' :key="index">
                 <img :src="require(`../assets/emoji/${key}`)" :alt="value" @click="chooseEmoji(key, value)"/>
               </div>
@@ -72,7 +72,8 @@ export default {
       onlineUserList: [],
       baseServerUrl: "http://localhost:3005",
       shakingVisible: false,
-      emojiList
+      emojiList,
+      showEmoji: false
     };
   },
   methods: {
@@ -112,6 +113,9 @@ export default {
     },
     chooseEmoji(key, value) {
       console.log(key, value);
+    },
+    emojiVisibleChange(bool){
+      this.showEmoji = bool;
     }
   },
   mounted() {
@@ -246,6 +250,9 @@ export default {
           .emoji-img{
             width: 10%;
           }
+        }
+        .hide{
+          display: none;
         }
       }
     }
