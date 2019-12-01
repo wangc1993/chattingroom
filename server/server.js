@@ -2,10 +2,11 @@
 * @Author: Carrey Wang
 * @Date:   2019-10-19 13:29:57
 * @Last Modified by:   Carrey Wang
-* @Last Modified time: 2019-11-16 21:08:58
+* @Last Modified time: 2019-12-01 21:12:49
 */
 const R = require('ramda');
 const Koa = require('koa');
+const moment = require('moment');
 const server = new Koa();
 //文件传输默认配置(放在路由前)
 const koaBody = require('koa-body');
@@ -31,7 +32,7 @@ const addOnlineUser = (data) => {
     }, server.context.onlineUserList);
     if (equalUser.length < 1) {
         server.context.onlineUserList.push(data);
-        io.emit("onlineUserAdd", server.context.onlineUserList);
+        io.emit("onlineUserAdd", {userList: server.context.onlineUserList, user: data, time: moment().format('HH:mm:ss')});
     }
 }
 
@@ -98,11 +99,11 @@ io.on('connection', socket => {
         const userIndex = R.findIndex(R.propEq('username', data.username))(server.context.onlineUserList);
         if(userIndex !== -1){
             server.context.onlineUserList.splice(userIndex, 1);
-            io.emit("onlineUserReduce", server.context.onlineUserList);
+            io.emit("onlineUserReduce", {userList: server.context.onlineUserList, user: data, time: moment().format('HH:mm:ss')});
         }
     })
     socket.on('shaking', (data) => {
-        io.emit("shaking", data);
+        io.emit("shaking", {user: data, time: moment().format('HH:mm:ss')});
     })
     socket.on('disconnect', async function () {
         console.log('SOCKET->disconnect:');

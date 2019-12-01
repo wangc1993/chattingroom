@@ -12,14 +12,18 @@
     <div class="container">
       <div class="conversation">
         <!-- 内容列表 -->
-        <ul class="messages"></ul>
+        <ul class="messages" ref="messages">
+          <li v-for="(message, index) in messageList" :key="index">
+            <ChatMessage :message="message"></ChatMessage>
+          </li>
+        </ul>
         <!-- 操作栏 -->
         <div class="extra">
           <div class="emoji" @mouseover="emojiVisibleChange(true)" @mouseleave="emojiVisibleChange(false)">
             <img src="../assets/smile.svg" alt="">
             <div :class="(showEmoji ? 'emoji-container' : 'emoji-container hide')">
               <div class="emoji-img" v-for='(value, key, index) in emojiList' :key="index">
-                <img :src="require(`../assets/emoji/${key}`)" :alt="value" @click="chooseEmoji(key, value)"/>
+                <img :title="value" :src="require(`../assets/emoji/${key}`)" :alt="value" @click="chooseEmoji(key, value)"/>
               </div>
             </div>
           </div>
@@ -30,10 +34,9 @@
             <img src="../assets/picture.svg" alt="">
           </div>
         </div>
-        <!-- autocomplete禁用自动完成功能 -->
-        <textarea class="m" autofocus></textarea>
+        <div class="textarea" ref="textarea" contenteditable="true"></div>
         <div class="action">
-          <button class="btn send">发送</button>
+          <button class="btn send" @click="send">发送</button>
           <button class="btn">关闭</button>
         </div>
       </div>
@@ -62,10 +65,12 @@
 import { getOnlineUserList } from "../actions/interface.js";
 import { sortToTop, delCookie } from "../utils/util";
 import ModifyUserAvatarDialog from "../components/dialog/modifyUserAvatar";
+import ChatMessage from "../components/chatMessage";
 import { emojiList } from '../consistant/emoji.js';
 export default {
   components: {
-    ModifyUserAvatarDialog
+    ModifyUserAvatarDialog,
+    ChatMessage
   },
   data() {
     return {
@@ -73,7 +78,8 @@ export default {
       baseServerUrl: "http://localhost:3005",
       shakingVisible: false,
       emojiList,
-      showEmoji: false
+      showEmoji: false,
+      messageList: []
     };
   },
   methods: {
@@ -106,38 +112,89 @@ export default {
         username
       });
     },
+    //聊天记录下滚
+    messageScroll(){
+      const that = this;
+      setTimeout(function(){
+        that.$refs.messages.scrollTop = that.$refs.messages.scrollHeight - that.$refs.messages.offsetHeight + 100;
+      }, 50)
+    },
+    //发送抖动窗口
     shaking: function(){
       this.$store.state.socket.emit("shaking", {
         username: this.$store.state.username
       });
     },
+    //添加表情
     chooseEmoji(key, value) {
-      console.log(key, value);
+      const imgSrc = require(`../assets/emoji/${key}`);
+      const imgTag = document.createElement("img");
+      imgTag.src = imgSrc;
+      imgTag.alt = value;
+      this.$refs.textarea.appendChild(imgTag);
     },
     emojiVisibleChange(bool){
       this.showEmoji = bool;
+    },
+    //发送信息
+    send(){
+      if(this.$refs.textarea.innerHTML){
+        this.messageList.push({
+          type: 1,
+          info: this.$refs.textarea.innerHTML,
+          ...this.onlineUserList[0]
+        })
+        this.$refs.textarea.innerHTML = '';
+        this.messageScroll();
+      }else{
+        alert('内容不能为空')
+      }
     }
   },
   mounted() {
     //获取在线用户列表
     this.getOnlineUserList();
     this.$store.state.socket.on("onlineUserAdd", data => {
-      this.onlineUserList = sortToTop(data);
+      this.onlineUserList = sortToTop(data.userList);
+      this.messageList.push({
+        type: 0,
+        info: data.user.username + ' 进入了聊天室',
+        time: data.time
+      })
+      this.messageScroll();
     });
     this.$store.state.socket.on("onlineUserReduce", data => {
-      if(data.length > 0){
-        this.onlineUserList = sortToTop(data);
+      if(data.userList.length > 0){
+        this.onlineUserList = sortToTop(data.userList);
+        this.messageList.push({
+          type: 0,
+          info: data.user.username + ' 离开了聊天室',
+          time: data.time
+        })
+        this.messageScroll();
       }
     });
     //窗口抖动判断
     this.$store.state.socket.on("shaking", (data) => {
       const that = this;
-      if(data.username !== that.$store.state.username){
+      if(data.user.username !== that.$store.state.username){
+        that.messageList.push({
+          type: 0,
+          info: data.user.username + ' 向您发送了一个抖动窗口',
+          time: data.time
+        })
         that.shakingVisible = true;
         setTimeout(function(){
           that.shakingVisible = false;
         }, 1000)
+      }else{
+        that.messageList.push({
+          type: 0,
+          info: '您发送了一个抖动窗口',
+          time: data.time
+        })
       }
+      that.messageScroll();
     });
   }
 };
@@ -347,42 +404,19 @@ export default {
   }
 }
 
-textarea {
+.textarea {
   display: block;
   width: 100%;
   height: 55px;
+  max-height: 55px;
   padding-left: 5px;
   padding-top: 5px;
-  resize: none;
   font-size: 16px;
-  background: none;
   border: none;
-  font-family: "微软雅黑";
+  text-align: left;
+  overflow: auto;
 }
-textarea:focus,
-.btn:focus,
-.name input:focus,
-.name button:focus {
+.textarea:focus, .btn:focus {
   outline: none;
-}
-/*滚动条样式*/
-textarea::-webkit-scrollbar {
-  /*滚动条整体样式*/
-  width: 4px; /*高宽分别对应横竖滚动条的尺寸*/
-  height: 4px;
-}
-textarea::-webkit-scrollbar-thumb {
-  /*滚动条里面小方块*/
-  border-radius: 5px;
-  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
-  -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
-  background: rgba(0, 0, 0, 0.2);
-}
-textarea::-webkit-scrollbar-track {
-  /*滚动条里面轨道*/
-  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
-  -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
-  border-radius: 0;
-  background: rgba(0, 0, 0, 0.1);
 }
 </style>

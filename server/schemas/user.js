@@ -6,8 +6,8 @@
  */
 
  /*定义用户的数据结构（表）*/
-let mongoose = require('mongoose');
-let moment = require('moment');
+const mongoose = require('mongoose');
+const moment = require('moment');
 
 module.exports = new mongoose.Schema({
     username: String,
