@@ -2,7 +2,7 @@
 * @Author: Carrey Wang
 * @Date:   2019-10-19 13:29:57
 * @Last Modified by:   Carrey Wang
-* @Last Modified time: 2019-12-01 21:12:49
+* @Last Modified time: 2019-12-02 21:33:02
 */
 const R = require('ramda');
 const Koa = require('koa');
@@ -104,6 +104,10 @@ io.on('connection', socket => {
     })
     socket.on('shaking', (data) => {
         io.emit("shaking", {user: data, time: moment().format('HH:mm:ss')});
+    })
+    socket.on('chatting', (data) => {
+        const user = R.find(R.propEq('username', data.username))(server.context.onlineUserList);
+        io.emit("chatting", {...user, info: data.info});
     })
     socket.on('disconnect', async function () {
         console.log('SOCKET->disconnect:');

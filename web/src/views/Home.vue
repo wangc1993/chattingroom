@@ -144,6 +144,11 @@ export default {
           info: this.$refs.textarea.innerHTML,
           ...this.onlineUserList[0]
         })
+        //后台分发
+        this.$store.state.socket.emit("chatting", {
+          username: this.$store.state.username,
+          info: this.$refs.textarea.innerHTML
+        });
         this.$refs.textarea.innerHTML = '';
         this.messageScroll();
       }else{
@@ -154,6 +159,7 @@ export default {
   mounted() {
     //获取在线用户列表
     this.getOnlineUserList();
+    //用户上线
     this.$store.state.socket.on("onlineUserAdd", data => {
       this.onlineUserList = sortToTop(data.userList);
       this.messageList.push({
@@ -163,6 +169,7 @@ export default {
       })
       this.messageScroll();
     });
+    //用户下线
     this.$store.state.socket.on("onlineUserReduce", data => {
       if(data.userList.length > 0){
         this.onlineUserList = sortToTop(data.userList);
@@ -175,7 +182,7 @@ export default {
       }
     });
     //窗口抖动判断
-    this.$store.state.socket.on("shaking", (data) => {
+    this.$store.state.socket.on("shaking", data => {
       const that = this;
       if(data.user.username !== that.$store.state.username){
         that.messageList.push({
@@ -196,6 +203,16 @@ export default {
       }
       that.messageScroll();
     });
+    //聊天信息
+    this.$store.state.socket.on("chatting", data => {
+      console.log(data);
+      if(data.username !== this.$store.state.username){
+        this.messageList.push({
+          type: 2,
+          ...data
+        })
+      }
+    })
   }
 };
 </script>
