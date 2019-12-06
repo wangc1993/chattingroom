@@ -2,7 +2,7 @@
 * @Author: Carrey Wang
 * @Date:   2019-10-19 13:29:57
 * @Last Modified by:   Carrey Wang
-* @Last Modified time: 2019-12-02 21:33:02
+* @Last Modified time: 2019-12-06 19:59:41
 */
 const R = require('ramda');
 const Koa = require('koa');
@@ -16,6 +16,7 @@ server.use(koaBody({
         maxFileSize: 51200    // 设置上传文件大小最大限制，默认2M
     }
 }));
+let ChatInfo = require('./models/chatInfo.js');
 /*加载数据库模块*/
 let mongoose = require('mongoose');
 //路由权限控制
@@ -107,7 +108,18 @@ io.on('connection', socket => {
     })
     socket.on('chatting', (data) => {
         const user = R.find(R.propEq('username', data.username))(server.context.onlineUserList);
-        io.emit("chatting", {...user, info: data.info});
+        const chatInfo = new ChatInfo({
+          username: user.username,
+          info: data.info,
+          infoType: data.infoType
+        });
+        const saveInfo = chatInfo.save();
+        /*判断是否保存成功*/
+        if (saveInfo) {
+            io.emit("chatting", {success: true,...user, info: data.info});
+        } else {
+            io.emit("chatting", {success: false});
+        }
     })
     socket.on('disconnect', async function () {
         console.log('SOCKET->disconnect:');

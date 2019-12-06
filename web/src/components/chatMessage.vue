@@ -36,23 +36,28 @@ export default {
         break;
       case 1:
         //聊天信息(自己)
-        this.$refs.message.innerHTML = `
-          <div style="display: flex;justify-content: flex-end;align-items: center;">
-            <div>
-              <div style="text-align: right;margin-bottom: 4px;">
-                ${this.message.username}
+        if(this.message.infoType === 1){
+          this.$refs.message.innerHTML = `
+            <div style="display: flex;justify-content: flex-end;align-items: center;">
+              <div>
+                <div style="text-align: right;margin-bottom: 4px;">
+                  ${this.message.username}
+                </div>
+                <div style="background-color: #0c76f180;padding: 4px;border-radius: 4px;text-align: left;">
+                  ${this.message.info}
+                </div>
               </div>
-              <div style="background-color: #0c76f180;padding: 4px;border-radius: 4px;text-align: left;">
-                ${this.message.info}
-              </div>
+              <img
+                style="width: 30px;height: 30px;border-radius: 15px;margin-left: 4px;min-width: 30px;"
+                src=${this.baseServerUrl + '/' + (this.message.avatar ? this.message.avatar : 'default.jpg')}
+                alt=${this.message.username}
+              />
             </div>
-            <img
-              style="width: 30px;height: 30px;border-radius: 15px;margin-left: 4px;min-width: 30px;"
-              src=${this.baseServerUrl + '/' + (this.message.avatar ? this.message.avatar : 'default.jpg')}
-              alt=${this.message.username}
-            />
-          </div>
-        `;
+          `;
+          }else if(this.message.infoType === 2){
+            this.$refs.message.innerHTML = `暂无`
+          }
+
         break;
       case 2:
         //聊天信息(别人)

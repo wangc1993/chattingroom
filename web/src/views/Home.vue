@@ -37,7 +37,7 @@
         <div class="textarea" ref="textarea" contenteditable="true"></div>
         <div class="action">
           <button class="btn send" @click="send">发送</button>
-          <button class="btn">关闭</button>
+          <button class="btn" @click="cancel">取消</button>
         </div>
       </div>
       <div class="contacts">
@@ -142,18 +142,23 @@ export default {
         this.messageList.push({
           type: 1,
           info: this.$refs.textarea.innerHTML,
-          ...this.onlineUserList[0]
+          ...this.onlineUserList[0],
+          infoType: 1
         })
         //后台分发
         this.$store.state.socket.emit("chatting", {
           username: this.$store.state.username,
-          info: this.$refs.textarea.innerHTML
+          info: this.$refs.textarea.innerHTML,
+          infoType: 1
         });
         this.$refs.textarea.innerHTML = '';
         this.messageScroll();
       }else{
         alert('内容不能为空')
       }
+    },
+    cancel(){
+      this.$refs.textarea.innerHTML = '';
     }
   },
   mounted() {
@@ -205,12 +210,15 @@ export default {
     });
     //聊天信息
     this.$store.state.socket.on("chatting", data => {
-      console.log(data);
-      if(data.username !== this.$store.state.username){
-        this.messageList.push({
-          type: 2,
-          ...data
-        })
+      if(data.success){
+        if(data.username !== this.$store.state.username){
+          this.messageList.push({
+            type: 2,
+            ...data
+          })
+        }
+      }else{
+        alert('信息发送失败')
       }
     })
   }
