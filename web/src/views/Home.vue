@@ -30,11 +30,11 @@
           <div class="shake" @click="shaking">
             <img src="../assets/light.svg" alt="">
           </div>
-          <div class="pic">
+          <div class="pic" @click="showUploadPicModal">
             <img src="../assets/picture.svg" alt="">
           </div>
         </div>
-        <div class="textarea" ref="textarea" contenteditable="true"></div>
+        <div class="textarea" ref="textarea" contenteditable="true" @keyup="checkSend"></div>
         <div class="action">
           <button class="btn send" @click="send">发送</button>
           <button class="btn" @click="cancel">取消</button>
@@ -58,6 +58,7 @@
       </div>
     </div>
     <ModifyUserAvatarDialog v-show="$store.state.showUploadVisible"/>
+    <UploadPictureDialog v-show="$store.state.showUploadPicVisible"/>
   </div>
 </template>
 
@@ -65,12 +66,14 @@
 import { getOnlineUserList } from "../actions/interface.js";
 import { sortToTop, delCookie } from "../utils/util";
 import ModifyUserAvatarDialog from "../components/dialog/modifyUserAvatar";
+import UploadPictureDialog from "../components/dialog/uploadPicture.vue";
 import ChatMessage from "../components/chatMessage";
 import { emojiList } from '../consistant/emoji.js';
 export default {
   components: {
     ModifyUserAvatarDialog,
-    ChatMessage
+    ChatMessage,
+    UploadPictureDialog
   },
   data() {
     return {
@@ -101,6 +104,9 @@ export default {
         this.$store.commit("setUploadModal", true);
       }
     },
+    showUploadPicModal(){
+      this.$store.commit("setUploadPicModal", true);
+    },
     logOut: function() {
       const username = this.$store.state.username;
       this.$store.commit("setUsername", '');
@@ -117,7 +123,7 @@ export default {
       const that = this;
       setTimeout(function(){
         that.$refs.messages.scrollTop = that.$refs.messages.scrollHeight - that.$refs.messages.offsetHeight + 100;
-      }, 50)
+      }, 100)
     },
     //发送抖动窗口
     shaking: function(){
@@ -136,24 +142,30 @@ export default {
     emojiVisibleChange(bool){
       this.showEmoji = bool;
     },
+    checkSend(e){
+      if (e.keyCode === 13) {
+        this.send();
+      }
+    },
     //发送信息
     send(){
-      if(this.$refs.textarea.innerHTML){
-        this.messageList.push({
-          type: 1,
-          info: this.$refs.textarea.innerHTML,
-          ...this.onlineUserList[0],
-          infoType: 1
-        })
+      const info = this.$refs.textarea.innerHTML.replace(/<div><br><\/div>$/g, '');
+      if(info && info !== '<div><br></div>'){
+        // this.messageList.push({
+        //   type: 1,
+        //   info: this.$refs.textarea.innerHTML,
+        //   ...this.onlineUserList[0],
+        //   infoType: 1
+        // })
         //后台分发
         this.$store.state.socket.emit("chatting", {
           username: this.$store.state.username,
-          info: this.$refs.textarea.innerHTML,
+          info,
           infoType: 1
         });
         this.$refs.textarea.innerHTML = '';
-        this.messageScroll();
       }else{
+        this.$refs.textarea.innerHTML = '';
         alert('内容不能为空')
       }
     },
@@ -210,16 +222,23 @@ export default {
     });
     //聊天信息
     this.$store.state.socket.on("chatting", data => {
+      console.log(data);
       if(data.success){
         if(data.username !== this.$store.state.username){
           this.messageList.push({
             type: 2,
             ...data
           })
+        }else{
+          this.messageList.push({
+            type: 1,
+            ...data
+          })
         }
       }else{
         alert('信息发送失败')
       }
+      this.messageScroll();
     })
   }
 };

@@ -11,6 +11,7 @@ export default new Vuex.Store({
     username: getCookie('username') ? getCookie('username') : '',
     token: getCookie('token') ? getCookie('token') : '',
     showUploadVisible: false,
+    showUploadPicVisible: false,
     socket
   },
   mutations: {
@@ -23,6 +24,10 @@ export default new Vuex.Store({
     //控制上传弹窗是否显示
     setUploadModal(state, bool){
       state.showUploadVisible = bool;
+    },
+    //控制上传图片是否显示
+    setUploadPicModal(state, bool){
+      state.showUploadPicVisible = bool;
     }
   },
   actions: {

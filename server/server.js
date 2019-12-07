@@ -2,10 +2,13 @@
 * @Author: Carrey Wang
 * @Date:   2019-10-19 13:29:57
 * @Last Modified by:   Carrey Wang
-* @Last Modified time: 2019-12-06 19:59:41
+* @Last Modified time: 2019-12-07 17:59:18
 */
 const R = require('ramda');
 const Koa = require('koa');
+const fs = require('fs');
+const uuidv1 = require('uuid/v1');
+const path = require('path');
 const moment = require('moment');
 const server = new Koa();
 //文件传输默认配置(放在路由前)
@@ -54,6 +57,7 @@ server.use(async (ctx, next) => {
 /*设置路由中间件，静态页面。将静态资源文件所在的目录作为参数传递给static 中间件就可以提供静态资源文件的访问了,就像apache里的www下的文件*/
 const static = require('koa-static');
 server.use(static(__dirname + '/avatar'));
+server.use(static(__dirname + '/chatPic'));
 
 //权限错误处理
 server.use((ctx, next) => {
@@ -108,17 +112,48 @@ io.on('connection', socket => {
     })
     socket.on('chatting', (data) => {
         const user = R.find(R.propEq('username', data.username))(server.context.onlineUserList);
-        const chatInfo = new ChatInfo({
-          username: user.username,
-          info: data.info,
-          infoType: data.infoType
-        });
-        const saveInfo = chatInfo.save();
-        /*判断是否保存成功*/
-        if (saveInfo) {
-            io.emit("chatting", {success: true,...user, info: data.info});
-        } else {
-            io.emit("chatting", {success: false});
+        let chatInfo = {} ;
+        if(data.infoType === 1){
+            chatInfo = new ChatInfo({
+              username: user.username,
+              info: data.info,
+              infoType: data.infoType
+            });
+            const saveInfo = chatInfo.save();
+            /*判断是否保存成功*/
+            if (saveInfo) {
+                io.emit("chatting", {success: true,...user, infoType: data.infoType, info: data.info});
+            } else {
+                io.emit("chatting", {success: false});
+            }
+        }else if(data.infoType === 2){
+            const uuid = uuidv1();
+            //过滤图片
+            let base64 = data.pic.replace(/^data:image\/\w+;base64,/, "")
+            //把图片转换成buffer对象
+            let dataBuffer = new Buffer(base64, 'base64')
+            //保存图片的地址是
+            let filePath = path.join(__dirname, '/chatPic/') + `${uuid + '.' +data.fileNameExt}`;
+            //保存图片
+            fs.writeFileSync(filePath,dataBuffer,(err) => {
+                if(err) {
+                    console.log(err)
+                }else {
+                    console.log('这边为什么不走');
+                }
+            })
+            chatInfo = new ChatInfo({
+              username: user.username,
+              infoType: data.infoType,
+              picAddress: `${uuid + '.' + data.fileNameExt}`
+            });
+            const saveInfo = chatInfo.save();
+            /*判断是否保存成功*/
+            if (saveInfo) {
+                io.emit("chatting", {success: true,...user, infoType: data.infoType,picAddress: `${uuid + '.' + data.fileNameExt}`});
+            } else {
+                io.emit("chatting", {success: false});
+            }
         }
     })
     socket.on('disconnect', async function () {

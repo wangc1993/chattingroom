@@ -55,29 +55,73 @@ export default {
             </div>
           `;
           }else if(this.message.infoType === 2){
-            this.$refs.message.innerHTML = `暂无`
+            this.$refs.message.innerHTML = `
+              <div style="display: flex;justify-content: flex-end;">
+                <div>
+                  <div style="text-align: right;margin-bottom: 4px;">
+                    ${this.message.username}
+                  </div>
+                  <div style="padding: 4px;border-radius: 4px;text-align: right;">
+                    <img
+                      style="width: 50%;border-radius: 15px;margin-left: 4px;"
+                      src=${this.baseServerUrl + '/' + this.message.picAddress}
+                      alt=${this.message.username}
+                    />
+                  </div>
+                </div>
+                <img
+                  style="width: 30px;height: 30px;border-radius: 15px;margin-left: 4px;min-width: 30px;"
+                  src=${this.baseServerUrl + '/' + (this.message.avatar ? this.message.avatar : 'default.jpg')}
+                  alt=${this.message.username}
+                />
+              </div>
+            `
           }
 
         break;
       case 2:
         //聊天信息(别人)
-        this.$refs.message.innerHTML = `
-          <div style="display: flex;align-items: center;">
-            <img
-              style="width: 30px;height: 30px;border-radius: 15px;margin-right: 4px;min-width: 30px;"
-              src=${this.baseServerUrl + '/' + (this.message.avatar ? this.message.avatar : 'default.jpg')}
-              alt=${this.message.username}
-            />
-            <div>
-              <div style="text-align: left;margin-bottom: 4px;">
-                ${this.message.username}
-              </div>
-              <div style="background-color: #0c76f180;padding: 4px;border-radius: 4px;text-align: left;">
-                ${this.message.info}
+        if(this.message.infoType === 1){
+          this.$refs.message.innerHTML = `
+            <div style="display: flex;align-items: center;">
+              <img
+                style="width: 30px;height: 30px;border-radius: 15px;margin-right: 4px;min-width: 30px;"
+                src=${this.baseServerUrl + '/' + (this.message.avatar ? this.message.avatar : 'default.jpg')}
+                alt=${this.message.username}
+              />
+              <div>
+                <div style="text-align: left;margin-bottom: 4px;">
+                  ${this.message.username}
+                </div>
+                <div style="background-color: #0c76f180;padding: 4px;border-radius: 4px;text-align: left;">
+                  ${this.message.info}
+                </div>
               </div>
             </div>
-          </div>
-        `;
+          `;
+        }else if(this.message.infoType === 2){
+          this.$refs.message.innerHTML = `
+            <div style="display: flex;">
+              <img
+                style="width: 30px;height: 30px;border-radius: 15px;margin-right: 4px;min-width: 30px;"
+                src=${this.baseServerUrl + '/' + (this.message.avatar ? this.message.avatar : 'default.jpg')}
+                alt=${this.message.username}
+              />
+              <div>
+                <div style="text-align: left;margin-bottom: 4px;">
+                  ${this.message.username}
+                </div>
+                <div style="padding: 4px;border-radius: 4px;text-align: left;">
+                  <img
+                    style="width: 50%;border-radius: 15px;margin-left: 4px;"
+                    src=${this.baseServerUrl + '/' + this.message.picAddress}
+                    alt=${this.message.username}
+                  />
+                </div>
+              </div>
+            </div>
+          `
+        }
         break;
     }
   }
