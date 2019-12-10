@@ -7,7 +7,7 @@
 
 ### 登录页
 <div align=center>
-<img src="https://github.com/wangc1993/chattingroom/blob/master/img/1.png" width="160" height="240">
+<img src="https://github.com/wangc1993/chattingroom/blob/master/img/1.png" width="250" height="180">
 </div>
 
 ### 聊天页
