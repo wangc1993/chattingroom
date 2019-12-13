@@ -2,8 +2,8 @@
 node_modules
 /dist
 /mongodb
-/avatar/user/*
-/chatPic/*
+avatar/user/
+chatPic/
 
 # local env files
 .env.local
