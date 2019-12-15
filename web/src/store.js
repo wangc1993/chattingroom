@@ -18,6 +18,9 @@ export default new Vuex.Store({
     setUsername(state, value) {
       state.username = value;
     },
+    setAvatar(state, value) {
+      state.avatar = value;
+    },
     setToken(state, value) {
       state.token = value;
     },

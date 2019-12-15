@@ -74,6 +74,8 @@ export default {
             if (res && res.state === "success") {
               setCookie("token", res.data.token);
               that.$store.commit("setToken", res.data.token);
+              setCookie("avatar", res.data.avatar);
+              that.$store.commit("setAvatar", res.data.avatar);
               setCookie("username", that.username);
               that.$store.commit("setUsername", that.username);
               that.$router.push({ name: "home" });

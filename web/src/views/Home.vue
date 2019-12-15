@@ -13,6 +13,9 @@
       <div class="conversation">
         <!-- 内容列表 -->
         <ul class="messages" ref="messages">
+          <li class="moreHistory">
+            <span @click="getHostory">更多</span>
+          </li>
           <li v-for="(message, index) in messageList" :key="index">
             <ChatMessage :message="message"></ChatMessage>
           </li>
@@ -63,7 +66,7 @@
 </template>
 
 <script>
-import { getOnlineUserList } from "../actions/interface.js";
+import { getOnlineUserList, getHostory } from "../actions/interface.js";
 import { sortToTop, delCookie } from "../utils/util";
 import ModifyUserAvatarDialog from "../components/dialog/modifyUserAvatar";
 import UploadPictureDialog from "../components/dialog/uploadPicture.vue";
@@ -104,7 +107,7 @@ export default {
         this.$store.commit("setUploadModal", true);
       }
     },
-    showUploadPicModal(){
+    showUploadPicModal: function(){
       this.$store.commit("setUploadPicModal", true);
     },
     logOut: function() {
@@ -160,6 +163,7 @@ export default {
         //后台分发
         this.$store.state.socket.emit("chatting", {
           username: this.$store.state.username,
+          avatar: this.$store.state.avatar,
           info,
           infoType: 1
         });
@@ -171,6 +175,26 @@ export default {
     },
     cancel(){
       this.$refs.textarea.innerHTML = '';
+    },
+    getHostory(){
+      const startTime = this.messageList.length > 0 ? this.messageList[0].addTime : 0;
+      getHostory(startTime, 10).then(res => {
+        if (res && res.state === "success") {
+          console.log(res.data);
+          res.data.map(info => {
+            const type = info.username !== this.$store.state.username ? 2 : 1;
+            this.messageList.unshift({
+              type,
+              ...info
+            });
+          })
+        } else {
+          throw new Error(res && res.msg);
+        }
+      })
+      .catch(e => {
+        alert(e.message);
+      });
     }
   },
   mounted() {
@@ -380,6 +404,19 @@ export default {
         -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
         border-radius: 0;
         background: rgba(0, 0, 0, 0.1);
+      }
+      .moreHistory{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        span{
+          color: #ddd;
+          margin-bottom: 4px;
+          &:hover{
+            color: #000;
+            cursor: pointer;
+          }
+        }
       }
     }
     .action {

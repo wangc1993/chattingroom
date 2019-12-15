@@ -2,15 +2,18 @@
 * @Author: Carrey Wang
 * @Date:   2019-10-19 13:52:54
 * @Last Modified by:   Carrey Wang
-* @Last Modified time: 2019-11-03 12:58:14
+* @Last Modified time: 2019-12-15 16:43:01
 */
 const { setResponse, setToken } = require('../utils/util');
 const router = require('koa-router')();
 const fs = require('fs');
 const path = require('path');
+const moment = require('moment');
 
 /*通过用户模型类操作数据库*/
-let User = require('../models/user.js');
+const User = require('../models/user.js');
+
+const ChatInfo = require('../models/chatInfo.js');
 
 router.post('/register', async (ctx, next) => {
   const { username, password } = ctx.request.body;
@@ -105,6 +108,30 @@ router.get('/autoLogin', async (ctx, next) => {
     setResponse(ctx, 'success', '自动登录成功', serchInfo);
   }else{
     setResponse(ctx, 'fail', '自动登录失败');
+  }
+})
+//获取历史聊天记录
+router.get('/historyChatInfo', async (ctx, next) => {
+  const { startTime, number } = ctx.request.query;
+  const historyChatInfo = await ChatInfo.find({
+    addTime: { $lt: startTime }
+  }).sort({
+    addTime: -1
+  }).limit(Number(number))
+  if(historyChatInfo){
+    const chatInfoList = historyChatInfo.map(info => {
+      return {
+        username: info.username,
+        info: info.info,
+        infoType: info.infoType,
+        picAddress: info.picAddress,
+        addTime: info.addTime
+        // addTime: moment(info.addTime).format('YYYY-MM-DD HH:mm:ss')
+      }
+    });
+    setResponse(ctx, 'success', '获取历史记录', chatInfoList);
+  }else{
+    setResponse(ctx, 'false', '获取历史记录失败');
   }
 })
 module.exports = router;

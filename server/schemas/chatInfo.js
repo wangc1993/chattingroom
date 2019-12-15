@@ -11,6 +11,7 @@ const moment = require('moment');
 
 module.exports = new mongoose.Schema({
     username: String,
+    avatar: String,
     info: {
         type: String,
         default: ''
@@ -21,7 +22,8 @@ module.exports = new mongoose.Schema({
         default: ''
     },
     addTime: {
-        type: String,
-        default: moment().format('YYYY-MM-DD HH:mm:ss')
+        type: Number,
+        default: moment().valueOf()
+        //default: moment().format('YYYY-MM-DD HH:mm:ss')
     }
 });

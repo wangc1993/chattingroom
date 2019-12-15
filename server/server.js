@@ -2,7 +2,7 @@
 * @Author: Carrey Wang
 * @Date:   2019-10-19 13:29:57
 * @Last Modified by:   Carrey Wang
-* @Last Modified time: 2019-12-07 17:59:18
+* @Last Modified time: 2019-12-15 16:14:40
 */
 const R = require('ramda');
 const Koa = require('koa');
@@ -88,7 +88,6 @@ const index = require('./routes/index');
 //校验请求的方法
 server.use(index.routes(), index.allowedMethods())
 
-
 //在线用户,koa.context是从其创建ctx的原型。您可以通过编辑koa.context为ctx添加其他属性。
 server.context.onlineUserList = [];
 // 监听连接事件
@@ -110,19 +109,21 @@ io.on('connection', socket => {
     socket.on('shaking', (data) => {
         io.emit("shaking", {user: data, time: moment().format('HH:mm:ss')});
     })
-    socket.on('chatting', (data) => {
+    socket.on('chatting', async (data) => {
         const user = R.find(R.propEq('username', data.username))(server.context.onlineUserList);
         let chatInfo = {} ;
         if(data.infoType === 1){
             chatInfo = new ChatInfo({
               username: user.username,
+              avatar: user.avatar,
               info: data.info,
-              infoType: data.infoType
+              infoType: data.infoType,
+              addTime: moment().valueOf()
             });
-            const saveInfo = chatInfo.save();
+            const saveInfo = await chatInfo.save();
             /*判断是否保存成功*/
             if (saveInfo) {
-                io.emit("chatting", {success: true,...user, infoType: data.infoType, info: data.info});
+                io.emit("chatting", {success: true,...user, infoType: data.infoType, info: data.info, addTime: saveInfo.addTime});
             } else {
                 io.emit("chatting", {success: false});
             }

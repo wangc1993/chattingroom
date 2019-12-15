@@ -2,7 +2,7 @@
 * @Author: Carrey Wang
 * @Date:   2019-10-16 21:48:23
 * @Last Modified by:   Carrey Wang
-* @Last Modified time: 2019-11-02 20:35:45
+* @Last Modified time: 2019-12-15 14:10:39
 */
 import { getCookie } from '../utils/util';
 // const baseURL = 'http://10.254.2.95:7002/mock/450';
@@ -110,11 +110,28 @@ const autoLogin = (username) => {
     })
 }
 
+const getHostory = (startTime, number) => {
+    return fetch(`${baseURL}/historyChatInfo?startTime=${startTime}&number=${number}`,{
+        method: 'GET',
+        headers: new Headers({
+            'Content-Type':'application/json;charset=utf-8',
+            'token': getCookie('token') || ''
+        })
+    }).then(res => {
+        return res.json();
+    }).then(json => {
+        return json;
+    }).catch(e => {
+        throw new Error(e.message);
+    })
+}
+
 export {
     register,
     login,
     getOnlineUserList,
     uploadAvatar,
     logOut,
-    autoLogin
+    autoLogin,
+    getHostory
 }
