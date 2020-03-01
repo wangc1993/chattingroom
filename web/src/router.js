@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Home from './views/Home.vue'
+import Home from './views/Home/index.vue'
 import { getCookie, delCookie } from './utils/util';
 import { autoLogin } from './actions/interface.js';
 

@@ -2,7 +2,7 @@
   <div :class="(shakingVisible ? 'main shaking' : 'main')">
     <div class="header">
       <div class="left">
-        <img src="../assets/room.jpg" />
+        <img src="../../assets/room.jpg" />
         欢迎来到解压聊天室
       </div>
       <div class="right">
@@ -23,18 +23,18 @@
         <!-- 操作栏 -->
         <div class="extra">
           <div class="emoji" @mouseover="emojiVisibleChange(true)" @mouseleave="emojiVisibleChange(false)">
-            <img src="../assets/smile.svg" alt="">
+            <img src="../../assets/smile.svg" alt="">
             <div :class="(showEmoji ? 'emoji-container' : 'emoji-container hide')">
               <div class="emoji-img" v-for='(value, key, index) in emojiList' :key="index">
-                <img :title="value" :src="require(`../assets/emoji/${key}`)" :alt="value" @click="chooseEmoji(key, value)"/>
+                <img :title="value" :src="require(`../../assets/emoji/${key}`)" :alt="value" @click="chooseEmoji(key, value)"/>
               </div>
             </div>
           </div>
           <div class="shake" @click="shaking">
-            <img src="../assets/light.svg" alt="">
+            <img src="../../assets/light.svg" alt="">
           </div>
           <div class="pic" @click="showUploadPicModal">
-            <img src="../assets/picture.svg" alt="">
+            <img src="../../assets/picture.svg" alt="">
           </div>
         </div>
         <div class="textarea" ref="textarea" contenteditable="true" @keyup="checkSend"></div>
@@ -62,21 +62,24 @@
     </div>
     <ModifyUserAvatarDialog v-show="$store.state.showUploadVisible"/>
     <UploadPictureDialog v-show="$store.state.showUploadPicVisible"/>
+    <TipModal></TipModal>
   </div>
 </template>
 
 <script>
-import { getOnlineUserList, getHostory } from "../actions/interface.js";
-import { sortToTop, delCookie } from "../utils/util";
-import ModifyUserAvatarDialog from "../components/dialog/modifyUserAvatar";
-import UploadPictureDialog from "../components/dialog/uploadPicture.vue";
-import ChatMessage from "../components/chatMessage";
-import { emojiList } from '../consistant/emoji.js';
+import { getOnlineUserList, getHostory } from "@/actions/interface.js";
+import { sortToTop, delCookie } from "@/utils/util";
+import ModifyUserAvatarDialog from "@/components/dialog/modifyUserAvatar";
+import UploadPictureDialog from "@/components/dialog/uploadPicture.vue";
+import ChatMessage from "@/components/chatMessage";
+import { emojiList } from '@/consistant/emoji.js';
+import TipModal from './components/TipModal.vue';
 export default {
   components: {
     ModifyUserAvatarDialog,
     ChatMessage,
-    UploadPictureDialog
+    UploadPictureDialog,
+    TipModal
   },
   data() {
     return {
@@ -136,7 +139,7 @@ export default {
     },
     //添加表情
     chooseEmoji(key, value) {
-      const imgSrc = require(`../assets/emoji/${key}`);
+      const imgSrc = require(`../../assets/emoji/${key}`);
       const imgTag = document.createElement("img");
       imgTag.src = imgSrc;
       imgTag.alt = value;

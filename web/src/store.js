@@ -2,8 +2,8 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import { getCookie } from './utils/util.js';
 import io from "socket.io-client";
-/*全双工通信*/
-const socket = io("http://192.168.0.103:3005");
+/*全双工通信-地址需要根据后端ip更新*/
+const socket = io("http://192.168.0.101:3005");
 Vue.use(Vuex)
 
 export default new Vuex.Store({
