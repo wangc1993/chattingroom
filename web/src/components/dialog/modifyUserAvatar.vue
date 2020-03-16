@@ -66,7 +66,8 @@ export default {
               this.uploadStatus = 1;
             }else{
               this.uploadStatus = 2;
-              throw new Error(res && res.msg);
+              this.showModal = true;
+              this.message = res.msg;
             }
           }).catch(e => {
             console.log(e.message)

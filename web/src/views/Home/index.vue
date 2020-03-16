@@ -22,19 +22,28 @@
         </ul>
         <!-- 操作栏 -->
         <div class="extra">
-          <div class="emoji" @mouseover="emojiVisibleChange(true)" @mouseleave="emojiVisibleChange(false)">
-            <img src="../../assets/smile.svg" alt="">
+          <div
+            class="emoji"
+            @mouseover="emojiVisibleChange(true)"
+            @mouseleave="emojiVisibleChange(false)"
+          >
+            <img src="../../assets/smile.svg" alt />
             <div :class="(showEmoji ? 'emoji-container' : 'emoji-container hide')">
-              <div class="emoji-img" v-for='(value, key, index) in emojiList' :key="index">
-                <img :title="value" :src="require(`../../assets/emoji/${key}`)" :alt="value" @click="chooseEmoji(key, value)"/>
+              <div class="emoji-img" v-for="(value, key, index) in emojiList" :key="index">
+                <img
+                  :title="value"
+                  :src="require(`../../assets/emoji/${key}`)"
+                  :alt="value"
+                  @click="chooseEmoji(key, value)"
+                />
               </div>
             </div>
           </div>
           <div class="shake" @click="shaking">
-            <img src="../../assets/light.svg" alt="">
+            <img src="../../assets/light.svg" alt />
           </div>
           <div class="pic" @click="showUploadPicModal">
-            <img src="../../assets/picture.svg" alt="">
+            <img src="../../assets/picture.svg" alt />
           </div>
         </div>
         <div class="textarea" ref="textarea" contenteditable="true" @keyup="checkSend"></div>
@@ -49,7 +58,7 @@
           <span id="num">({{onlineUserList.length}})</span>
         </h1>
         <div class="users">
-          <div v-for="(user, index) in onlineUserList" :key="index" class="user" >
+          <div v-for="(user, index) in onlineUserList" :key="index" class="user">
             <img
               :src="baseServerUrl + '/' + (user.avatar ? user.avatar : 'default.jpg')"
               :alt="user.username"
@@ -60,8 +69,20 @@
         <p v-show="onlineUserList.length > 0 ? false : true">当前无人在线哟~</p>
       </div>
     </div>
-    <ModifyUserAvatarDialog v-show="$store.state.showUploadVisible"/>
-    <UploadPictureDialog v-show="$store.state.showUploadPicVisible"/>
+    <modal
+      title="提示:"
+      confirmText="确定"
+      :btnType="3"
+      :showModal="showModal"
+      @submit="showModal=false"
+      @cancel="showModal=false"
+    >
+      <template v-slot:body>
+        <p>{{message}}</p>
+      </template>
+    </modal>
+    <ModifyUserAvatarDialog v-show="$store.state.showUploadVisible" />
+    <UploadPictureDialog v-show="$store.state.showUploadPicVisible" />
     <TipModal></TipModal>
   </div>
 </template>
@@ -72,14 +93,16 @@ import { sortToTop, delCookie } from "@/utils/util";
 import ModifyUserAvatarDialog from "@/components/dialog/modifyUserAvatar";
 import UploadPictureDialog from "@/components/dialog/uploadPicture.vue";
 import ChatMessage from "@/components/chatMessage";
-import { emojiList } from '@/consistant/emoji.js';
-import TipModal from './components/TipModal.vue';
+import { emojiList } from "@/consistant/emoji.js";
+import TipModal from "./components/TipModal.vue";
+import Modal from "@/components/Modal";
 export default {
   components: {
     ModifyUserAvatarDialog,
     ChatMessage,
     UploadPictureDialog,
-    TipModal
+    TipModal,
+    Modal
   },
   data() {
     return {
@@ -88,7 +111,9 @@ export default {
       shakingVisible: false,
       emojiList,
       showEmoji: false,
-      messageList: []
+      messageList: [],
+      message: "",
+      showModal: false
     };
   },
   methods: {
@@ -98,41 +123,46 @@ export default {
           if (res && res.state === "success") {
             this.onlineUserList = sortToTop(res.data);
           } else {
-            throw new Error(res && res.msg);
+            this.showModal = true;
+            this.message = res.msg;
           }
         })
-        .catch(e => {
-          alert(e.message);
+        .catch(() => {
+          this.showModal = true;
+          this.message = "网络异常，请稍后重试";
         });
     },
-    showUploadModal: function(index){
-      if(index === 0){
+    showUploadModal: function(index) {
+      if (index === 0) {
         this.$store.commit("setUploadModal", true);
       }
     },
-    showUploadPicModal: function(){
+    showUploadPicModal: function() {
       this.$store.commit("setUploadPicModal", true);
     },
     logOut: function() {
       const username = this.$store.state.username;
-      this.$store.commit("setUsername", '');
-      this.$store.commit("setToken", '');
-      delCookie('username');
-      delCookie('token');
+      this.$store.commit("setUsername", "");
+      this.$store.commit("setToken", "");
+      delCookie("username");
+      delCookie("token");
       this.$router.push({ name: "login" });
       this.$store.state.socket.emit("logOut", {
         username
       });
     },
     //聊天记录下滚
-    messageScroll(){
+    messageScroll() {
       const that = this;
-      setTimeout(function(){
-        that.$refs.messages.scrollTop = that.$refs.messages.scrollHeight - that.$refs.messages.offsetHeight + 100;
-      }, 100)
+      setTimeout(function() {
+        that.$refs.messages.scrollTop =
+          that.$refs.messages.scrollHeight -
+          that.$refs.messages.offsetHeight +
+          100;
+      }, 100);
     },
     //发送抖动窗口
-    shaking: function(){
+    shaking: function() {
       this.$store.state.socket.emit("shaking", {
         username: this.$store.state.username
       });
@@ -145,18 +175,21 @@ export default {
       imgTag.alt = value;
       this.$refs.textarea.appendChild(imgTag);
     },
-    emojiVisibleChange(bool){
+    emojiVisibleChange(bool) {
       this.showEmoji = bool;
     },
-    checkSend(e){
+    checkSend(e) {
       if (e.keyCode === 13) {
         this.send();
       }
     },
     //发送信息
-    send(){
-      const info = this.$refs.textarea.innerHTML.replace(/<div><br><\/div>$/g, '');
-      if(info && info !== '<div><br></div>'){
+    send() {
+      const info = this.$refs.textarea.innerHTML.replace(
+        /<div><br><\/div>$/g,
+        ""
+      );
+      if (info && info !== "<div><br></div>") {
         // this.messageList.push({
         //   type: 1,
         //   info: this.$refs.textarea.innerHTML,
@@ -170,34 +203,39 @@ export default {
           info,
           infoType: 1
         });
-        this.$refs.textarea.innerHTML = '';
-      }else{
-        this.$refs.textarea.innerHTML = '';
-        alert('内容不能为空')
+        this.$refs.textarea.innerHTML = "";
+      } else {
+        this.$refs.textarea.innerHTML = "";
+        this.showModal = true;
+        this.message = "内容不能为空";
       }
     },
-    cancel(){
-      this.$refs.textarea.innerHTML = '';
+    cancel() {
+      this.$refs.textarea.innerHTML = "";
     },
-    getHostory(){
-      const startTime = this.messageList.length > 0 ? this.messageList[0].addTime : 0;
-      getHostory(startTime, 10).then(res => {
-        if (res && res.state === "success") {
-          console.log(res.data);
-          res.data.map(info => {
-            const type = info.username !== this.$store.state.username ? 2 : 1;
-            this.messageList.unshift({
-              type,
-              ...info
+    getHostory() {
+      const startTime =
+        this.messageList.length > 0 ? this.messageList[0].addTime : 0;
+      getHostory(startTime, 10)
+        .then(res => {
+          if (res && res.state === "success") {
+            console.log(res.data);
+            res.data.map(info => {
+              const type = info.username !== this.$store.state.username ? 2 : 1;
+              this.messageList.unshift({
+                type,
+                ...info
+              });
             });
-          })
-        } else {
-          throw new Error(res && res.msg);
-        }
-      })
-      .catch(e => {
-        alert(e.message);
-      });
+          } else {
+            this.showModal = true;
+            this.message = res.msg;
+          }
+        })
+        .catch(() => {
+          this.showModal = true;
+          this.message = "网络异常，请稍后重试";
+        });
     }
   },
   mounted() {
@@ -208,65 +246,66 @@ export default {
       this.onlineUserList = sortToTop(data.userList);
       this.messageList.push({
         type: 0,
-        info: data.user.username + ' 进入了聊天室',
+        info: data.user.username + " 进入了聊天室",
         time: data.time
-      })
+      });
       this.messageScroll();
     });
     //用户下线
     this.$store.state.socket.on("onlineUserReduce", data => {
-      if(data.userList.length > 0){
+      if (data.userList.length > 0) {
         this.onlineUserList = sortToTop(data.userList);
         this.messageList.push({
           type: 0,
-          info: data.user.username + ' 离开了聊天室',
+          info: data.user.username + " 离开了聊天室",
           time: data.time
-        })
+        });
         this.messageScroll();
       }
     });
     //窗口抖动判断
     this.$store.state.socket.on("shaking", data => {
       const that = this;
-      if(data.user.username !== that.$store.state.username){
+      if (data.user.username !== that.$store.state.username) {
         that.messageList.push({
           type: 0,
-          info: data.user.username + ' 向您发送了一个抖动窗口',
+          info: data.user.username + " 向您发送了一个抖动窗口",
           time: data.time
-        })
+        });
         that.shakingVisible = true;
-        setTimeout(function(){
+        setTimeout(function() {
           that.shakingVisible = false;
-        }, 1000)
-      }else{
+        }, 1000);
+      } else {
         that.messageList.push({
           type: 0,
-          info: '您发送了一个抖动窗口',
+          info: "您发送了一个抖动窗口",
           time: data.time
-        })
+        });
       }
       that.messageScroll();
     });
     //聊天信息
     this.$store.state.socket.on("chatting", data => {
       console.log(data);
-      if(data.success){
-        if(data.username !== this.$store.state.username){
+      if (data.success) {
+        if (data.username !== this.$store.state.username) {
           this.messageList.push({
             type: 2,
             ...data
-          })
-        }else{
+          });
+        } else {
           this.messageList.push({
             type: 1,
             ...data
-          })
+          });
         }
-      }else{
-        alert('信息发送失败')
+      } else {
+        this.showModal = true;
+        this.message = "信息发送失败";
       }
       this.messageScroll();
-    })
+    });
   }
 };
 </script>
@@ -320,11 +359,11 @@ export default {
       border-radius: 25px;
       vertical-align: middle;
     }
-    .right{
-      span{
+    .right {
+      span {
         font-size: 16px;
         color: #ddd;
-        &:hover{
+        &:hover {
           cursor: pointer;
           color: #000;
         }
@@ -345,23 +384,23 @@ export default {
       padding-left: 10px;
       display: flex;
       align-items: center;
-      div{
+      div {
         height: 32px;
         line-height: 32px;
         display: flex;
         margin: 0 4px;
         align-items: center;
-        img{
+        img {
           width: 20px;
           height: 20px;
-          &:hover{
+          &:hover {
             cursor: pointer;
           }
         }
       }
-      .emoji{
+      .emoji {
         position: relative;
-        .emoji-container{
+        .emoji-container {
           position: absolute;
           width: 200px;
           height: 200px;
@@ -375,11 +414,11 @@ export default {
           border-radius: 8px;
           align-items: center;
           justify-content: space-between;
-          .emoji-img{
+          .emoji-img {
             width: 10%;
           }
         }
-        .hide{
+        .hide {
           display: none;
         }
       }
@@ -408,14 +447,14 @@ export default {
         border-radius: 0;
         background: rgba(0, 0, 0, 0.1);
       }
-      .moreHistory{
+      .moreHistory {
         display: flex;
         align-items: center;
         justify-content: center;
-        span{
+        span {
           color: #ddd;
           margin-bottom: 4px;
-          &:hover{
+          &:hover {
             color: #000;
             cursor: pointer;
           }
@@ -500,7 +539,8 @@ export default {
   text-align: left;
   overflow: auto;
 }
-.textarea:focus, .btn:focus {
+.textarea:focus,
+.btn:focus {
   outline: none;
 }
 </style>

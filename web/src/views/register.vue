@@ -38,17 +38,35 @@
       已有账号，
       <a href="javascript:;" @click="toLogin" style="color: rgb(47, 167, 46)">去登陆</a>
     </div>
+    <modal
+      title="提示:"
+      confirmText="确定"
+      :btnType="3"
+      :showModal="showModal"
+      @submit="showModal=false"
+      @cancel="showModal=false"
+    >
+      <template v-slot:body>
+        <p>{{message}}</p>
+      </template>
+    </modal>
   </div>
 </template>
 
 <script>
 import { register } from "../actions/interface.js";
+import Modal from "@/components/Modal";
 export default {
   data() {
     return {
       password: "",
-      username: ""
+      username: "",
+      message: "",
+      showModal: false
     };
+  },
+  components: {
+    Modal
   },
   methods: {
     toLogin() {
@@ -72,14 +90,17 @@ export default {
             if (res && res.state === "success") {
               this.$router.push({ name: "login" });
             } else {
-              throw new Error(res && res.msg);
+              this.showModal = true;
+              this.message = res.msg;
             }
           })
-          .catch(e => {
-            alert(e.message);
+          .catch(() => {
+            this.showModal = true;
+            this.message = "网络异常，请稍后重试";
           });
       } else {
-        alert("用户名不能为空");
+        this.showModal = true;
+        this.message = "用户名不能为空";
       }
     }
   }

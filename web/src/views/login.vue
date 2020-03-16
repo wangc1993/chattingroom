@@ -38,18 +38,36 @@
       还没有账号，
       <a href="javascript:;" @click="toRegister" style="color: rgb(47, 167, 46)">去注册</a>
     </div>
+    <modal
+      title="提示:"
+      confirmText="确定"
+      :btnType="3"
+      :showModal="showModal"
+      @submit="showModal=false"
+      @cancel="showModal=false"
+    >
+      <template v-slot:body>
+        <p>{{message}}</p>
+      </template>
+    </modal>
   </div>
 </template>
 
 <script>
 import { login } from "../actions/interface.js";
 import { setCookie } from "../utils/util.js";
+import Modal from "@/components/Modal";
 export default {
   data() {
     return {
       password: "",
-      username: ""
+      username: "",
+      message: '',
+      showModal: false
     };
+  },
+  components: {
+    Modal
   },
   methods: {
     toRegister() {
@@ -85,14 +103,17 @@ export default {
                 username: res.data.username
               });
             } else {
-              throw new Error(res && res.msg);
+              this.showModal = true;
+              this.message = res.msg
             }
           })
-          .catch(e => {
-            alert(e.message);
+          .catch(() => {
+            this.showModal = true;
+            this.message = '网络异常，请稍后重试'
           });
       } else {
-        alert("用户名不能为空");
+        this.showModal = true;
+        this.message = '用户名不能为空'
       }
     }
   }

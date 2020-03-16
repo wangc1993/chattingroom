@@ -1,26 +1,36 @@
 <template>
-<transition name="slide">
-  <div class="modal" v-show="showModal">
+  <transition name="slide">
+    <div class="modal" v-show="showModal" @click="$emit('cancel')">
       <div class="mask"></div>
       <div class="modal-dialog">
         <div class="modal-header">
           <span>{{title}}</span>
-          <a href="javascript:;" class="icon-close" @click="$emit('cancle')"></a>
+          <a href="javascript:;" class="icon-close" @click="$emit('cancel')"></a>
         </div>
         <div class="modal-body">
           <slot name="body"></slot>
         </div>
         <div class="modal-footer">
-          <a href="javascript:;" class="btn" v-if="btnType === 1" @click="$emit('submit')">{{confirmText}}</a>
-          <a href="javascript:;" class="btn" v-if="btnType === 2" @click="$emit('cancle')">{{cancleText}}</a>
+          <a
+            href="javascript:;"
+            class="btn"
+            v-if="btnType === 1"
+            @click="$emit('submit')"
+          >{{confirmText}}</a>
+          <a
+            href="javascript:;"
+            class="btn"
+            v-if="btnType === 2"
+            @click="$emit('cancel')"
+          >{{cancleText}}</a>
           <div class="btn-group" v-if="btnType === 3">
             <a href="javascript:;" class="btn" @click="$emit('submit')">{{confirmText}}</a>
-            <a href="javascript:;" class="btn btn-default" @click="$emit('submit')">{{cancleText}}</a>
+            <a href="javascript:;" class="btn btn-default" @click="$emit('cancel')">{{cancelText}}</a>
           </div>
         </div>
       </div>
     </div>
-   </transition>
+  </transition>
 </template>
 
 <script>
@@ -41,19 +51,18 @@ export default {
       type: String,
       default: "确定"
     },
-    cancleText: {
+    cancelText: {
       type: String,
       default: "取消"
     },
     showModal: {
       type: Boolean,
       default: true
-    },
+    }
   },
   data() {
-    return {
-    };
-  },
+    return {};
+  }
 };
 </script>
 
@@ -64,6 +73,9 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
+  a{
+    text-decoration: none;
+  }
   &.slide-enter-active {
     top: 0;
   }
@@ -87,19 +99,21 @@ export default {
     position: absolute;
     top: 40%;
     left: 50%;
-    width: 560px;
+    width: 25%;
+    min-width: 300px;
     height: auto;
     background-color: #ffffff;
     transform: translate(-50%, -50%);
     .modal-header {
-      height: 60px;
-      background-color: #F5F5F5;
+      height: 30px;
+      background-color: #f5f5f5;
       padding: 0 25px;
-      line-height: 60px;
+      line-height: 30px;
       font-size: 16px;
+      text-align: left;
       .icon-close {
         position: absolute;
-        top: 23px;
+        top: 8px;
         right: 25px;
         width: 14px;
         height: 14px;
@@ -108,14 +122,21 @@ export default {
       }
     }
     .modal-body {
-      padding: 42px 40px 54px;
+      padding: 20px;
       font-size: 14px;
     }
     .modal-footer {
-      height: 82px;
-      line-height: 82px;
-      text-align: center;
-      background-color: #F5F5F5;
+      height: 30px;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      background-color: #f5f5f5;
+      .btn{
+        margin-right: 10px;
+        &:hover{
+          color: blue;
+        }
+      }
     }
   }
 }
